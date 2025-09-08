@@ -1,0 +1,153 @@
+.authPage {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.authContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card-background-color);
+  padding: 2rem;
+}
+
+.brandingContainer {
+  flex: 1;
+  display: none; /* Hidden on small screens */
+  background: linear-gradient(135deg, var(--primary-color), #818cf8);
+  color: white;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 2rem;
+}
+
+@media (min-width: 992px) {
+  .brandingContainer {
+    display: flex;
+  }
+}
+
+.brandContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.brandIcon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.brandTitle {
+    font-size: 2.5rem;
+    font-weight: 800;
+}
+
+.brandSubtitle {
+    font-size: 1.125rem;
+    max-width: 400px;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+.authCard {
+  width: 100%;
+  max-width: 400px;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-secondary-color);
+  margin-bottom: 2rem;
+}
+
+.errorBox {
+  font-size: 0.875rem;
+  text-align: center;
+  color: #991b1b;
+  background-color: #fee2e2;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.inputGroup label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 1rem;
+}
+
+.inputGroup input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.submitButton {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--primary-color);
+  border-radius: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+  background-color: var(--primary-hover-color);
+}
+
+.submitButton:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.switchMode {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.switchButton {
+  font-weight: 500;
+  color: var(--primary-color);
+  background: none;
+  font-size: 0.875rem;
+}
+
+.switchButton:hover {
+  text-decoration: underline;
+}
