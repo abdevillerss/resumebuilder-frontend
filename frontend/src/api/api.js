@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
  
-  baseURL: 'http://localhost:3001/api/',
+  baseURL: 'https://ats-resume-builder-8xjfahqko-pavan-s-projects-ee943b68.vercel.app/api',
 });
 
 api.interceptors.request.use(
