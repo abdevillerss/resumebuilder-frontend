@@ -21,7 +21,12 @@ app.get("/", (req, res) => {
 // ... your other app.use routes go here ...
 // e.g., app.use('/api/users', userRoutes);
 
-app.use(cors());       // Enables CORS for all routes, allowing our frontend to make requests.
+const corsOptions = {
+  origin: 'https://abdevillerss.github.io',
+  optionsSuccessStatus: 200 // For legacy browser support
+};
+
+app.use(cors(corsOptions));       // Enables CORS for all routes, allowing our frontend to make requests.
 app.use(express.json()); 
 
 app.use((req, res, next) => {
