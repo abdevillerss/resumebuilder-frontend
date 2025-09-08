@@ -1,14 +1,15 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// Corrected import: Use HashRouter for GitHub Pages compatibility
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
-// Corrected imports to match your file names
 import NotFoundPage from './pages/notfoundpage'; 
 import TemplateSelectionPage from './pages/template';
 import EditorPage from './pages/resumeeditor';
 
 function App() {
   return (
+    // Use HashRouter instead of BrowserRouter
     <Router>
       <Routes>
         <Route path="/login" element={<AuthPage />} />
