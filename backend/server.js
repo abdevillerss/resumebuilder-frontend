@@ -26,7 +26,32 @@ const corsOptions = {
   optionsSuccessStatus: 200 // For legacy browser support
 };
 
-app.use(cors(corsOptions));       // Enables CORS for all routes, allowing our frontend to make requests.
+app.use(cors(corsOptions));   
+
+
+app.use((req, res, next) => {
+  // Allow requests from your specific frontend URL
+  res.setHeader('Access-Control-Allow-Origin', 'https://abdevillerss.github.io');
+
+  // Allow specific methods the browser can use
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+  );
+
+  // Allow specific headers the browser can send
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization'
+  );
+
+  // Handle the OPTIONS preflight request
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  next();
+});// Enables CORS for all routes, allowing our frontend to make requests.
 app.use(express.json()); 
 
 app.use((req, res, next) => {
