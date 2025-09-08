@@ -86,53 +86,38 @@
 
 
 const express = require('express');
+const cors = require('cors');
+
+// IMPORTANT: Make sure these paths are correct based on your file structure
+const authRoutes = require('./routes/authroutes'); 
+const resumeRoutes = require('./routes/resumeroutes'); 
+
 const app = express();
 
-// --- START: ROBUST CORS CONFIGURATION ---
-// This MUST be the very first middleware.
-app.use((req, res, next) => {
-  // Allow requests from your specific frontend URL
-  res.setHeader('Access-Control-Allow-Origin', 'https://abdevillerss.github.io');
-  
-  // Allow specific methods the browser can use
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, PATCH, OPTIONS'
-  );
-  
-  // Allow specific headers the browser can send, especially Authorization for tokens
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization'
-  );
-  
-  // Handle the browser's "preflight" OPTIONS request
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
-// --- END: ROBUST CORS CONFIGURATION ---
+// --- CORS Configuration ---
+// This MUST come before your routes.
+// It allows your frontend at github.io to make requests to this backend.
+app.use(cors({
+  origin: 'https://abdevillerss.github.io'
+}));
 
+// --- Middleware ---
+// This allows your server to understand incoming JSON data.
 app.use(express.json());
 
-// --- START: NEW DEBUG ROUTE ---
-app.get("/api/debug-cors", (req, res) => {
-  console.log("--- DEBUG-CORS Route Hit ---");
-  console.log("Request Headers:", req.headers);
-  res.status(200).json({ message: "CORS debug successful! The backend is connected." });
-});
-// --- END: NEW DEBUG ROUTE ---
+// --- API Routes ---
+// All your API endpoints are defined here.
+// The frontend will call URLs like '/api/auth/login'.
+app.use('/api/auth', authRoutes);
+app.use('/api/resumes', resumeRoutes);
 
-// Your original root route
+// --- Root Route for Health Check ---
+// A simple route to confirm the server is running.
 app.get("/", (req, res) => {
-  res.send("Backend server is running.");
+  res.send("Backend server is running correctly.");
 });
 
-// ... your other API routes (app.use('/api/users', ...)) ...
-// Make sure to re-add your other route handlers here if they are in this file.
-
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// --- Vercel Export ---
+// This is the most important part. We export the configured 'app' for Vercel's
+// serverless environment to use. We DO NOT call app.listen(). Vercel does this for us.
+module.exports = app;
