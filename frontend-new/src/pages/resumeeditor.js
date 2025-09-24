@@ -1,0 +1,1058 @@
+
+
+// import React, { useState, useEffect, useCallback } from 'react';
+// import { useParams, useNavigate } from 'react-router-dom';
+// import api from '../api/api';
+// import styles from './resumeeditor.module.css';
+// import { FiSave, FiPlus, FiTrash2, FiEdit, FiArrowUp, FiArrowDown, FiRefreshCw, FiChevronDown, FiStar, FiZap, FiFileText, FiCheckCircle, FiBold } from 'react-icons/fi';
+
+// // New component for adding a custom section
+// const AddSectionModal = ({ onAddSection, onClose }) => {
+//     const [sectionName, setSectionName] = useState('');
+//     const [sectionType, setSectionType] = useState('list-with-bullets');
+
+//     const handleAdd = () => {
+//         if (sectionName.trim()) {
+//             onAddSection(sectionName, sectionType);
+//             onClose();
+//         }
+//     };
+
+//     return (
+//         <div className={styles.modalOverlay}>
+//             <div className={styles.modalContent}>
+//                 <h3>Add New Section</h3>
+//                 <label>Section Name:</label>
+//                 <input
+//                     type="text"
+//                     value={sectionName}
+//                     onChange={(e) => setSectionName(e.target.value)}
+//                     placeholder="e.g., Certifications, Volunteer Work"
+//                 />
+//                 <label>Section Type:</label>
+//                 <select value={sectionType} onChange={(e) => setSectionType(e.target.value)}>
+//                     <option value="list-with-bullets">List with Bullet Points</option>
+//                     <option value="single-input-and-description">Single Box with Description</option>
+//                     <option value="single-text-area">Single Text Area</option>
+//                 </select>
+//                 <div className={styles.modalActions}>
+//                     <button onClick={onClose} className={styles.cancelButton}>Cancel</button>
+//                     <button onClick={handleAdd} className={styles.addButton}>Add Section</button>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// // A re-usable input component with bold and AI enhancement buttons
+// const AiInputField = ({ path, value, placeholder, onChange, onImprove, improvingPath, type = 'input' }) => {
+//     const isImproving = improvingPath === path;
+//     const InputComponent = type === 'textarea' ? 'textarea' : 'input';
+
+//     const handleBoldClick = () => {
+//         const textToBold = window.getSelection().toString();
+//         if (textToBold && value) {
+//             const newText = value.replace(textToBold, `**${textToBold}**`);
+//             onChange(path, newText);
+//         }
+//     };
+
+//     return (
+//         <div className={styles.inputWithAi}>
+//             <InputComponent
+//                 type={type === 'textarea' ? undefined : type}
+//                 placeholder={placeholder}
+//                 value={value || ''}
+//                 onChange={e => onChange(path, e.target.value)}
+//                 className={styles.inputField}
+//             />
+//             <div className={styles.inputControls}>
+//                 <button
+//                     onClick={handleBoldClick}
+//                     className={styles.boldButton}
+//                     title="Bold selected text"
+//                 >
+//                     <FiBold />
+//                 </button>
+//                 <button
+//                     onClick={() => onImprove(path, value)}
+//                     className={styles.aiButton}
+//                     title="Improve Writing with AI"
+//                     disabled={isImproving}
+//                 >
+//                     {isImproving ? <FiRefreshCw className={styles.spinning} /> : <FiEdit />}
+//                 </button>
+//             </div>
+//         </div>
+//     );
+// };
+
+// // Collapsible Section Component
+// const Section = ({ title, children, sectionControls }) => {
+//     const [isOpen, setIsOpen] = useState(true);
+//     return (
+//         <div className={`${styles.formSection} ${isOpen ? styles.open : ''}`}>
+//             <div className={styles.sectionHeader} onClick={() => setIsOpen(!isOpen)}>
+//                 <h3>{title}</h3>
+//                 <div className={styles.sectionControls}>
+//                     {sectionControls}
+//                     <FiChevronDown className={styles.chevron} />
+//                 </div>
+//             </div>
+//             <div className={styles.sectionContent}>{children}</div>
+//         </div>
+//     );
+// };
+
+// const ResumeEditor = () => {
+//     const { id } = useParams();
+//     const navigate = useNavigate();
+
+//     const [resume, setResume] = useState(null);
+//     const [pdfUrl, setPdfUrl] = useState(null);
+//     const [loading, setLoading] = useState(true);
+//     const [saving, setSaving] = useState(false);
+//     const [previewLoading, setPreviewLoading] = useState(false);
+//     const [error, setError] = useState('');
+//     const [mode, setMode] = useState('EDIT');
+//     const [jobDescription, setJobDescription] = useState('');
+//     const [aiResult, setAiResult] = useState(null);
+//     const [aiLoading, setAiLoading] = useState(false);
+//     const [improvingText, setImprovingText] = useState(null);
+//     const [isJobDescVisible, setIsJobDescVisible] = useState(true);
+//     const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
+
+
+//     const updatePreview = useCallback(async (currentResume) => {
+//         if (!id || !currentResume) return;
+//         setPreviewLoading(true);
+//         setError('');
+//         try {
+//             const response = await api.post(`/api/resume/preview/${id}`, {
+//                 resumeData: currentResume.resumeData,
+//                 templateName: currentResume.templateName
+//             }, { responseType: 'blob' });
+
+//             const newPdfUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+//             setPdfUrl(prevUrl => {
+//                 if (prevUrl) window.URL.revokeObjectURL(prevUrl);
+//                 return newPdfUrl;
+//             });
+//         } catch (err) {
+//             console.error("Preview Error:", err);
+//             setError("Failed to generate PDF preview.");
+//         } finally {
+//             setPreviewLoading(false);
+//         }
+//     }, [id]);
+
+//     useEffect(() => {
+//         const fetchResumeData = async () => {
+//             if (!id) { navigate('/dashboard'); return; }
+//             setLoading(true);
+//             try {
+//                 const { data } = await api.get(`/api/resume/${id}`);
+//                 setResume(data);
+//             } catch (err) {
+//                 setError('Failed to load resume data.');
+//                 navigate('/dashboard');
+//             } finally {
+//                 setLoading(false);
+//             }
+//         };
+//         fetchResumeData();
+
+//         return () => { if (pdfUrl) { window.URL.revokeObjectURL(pdfUrl); } };
+//     }, [id, navigate]);
+
+//     useEffect(() => {
+//         if (resume) {
+//             const handler = setTimeout(() => {
+//                 updatePreview(resume);
+//             }, 500);
+//             return () => clearTimeout(handler);
+//         }
+//     }, [resume, updatePreview]);
+
+//     const handleDataChange = (path, value) => {
+//         setResume(prev => {
+//             if (!prev) return null;
+            
+//             // --- FIX: When changing a legacy key, update it to the new key ---
+//             let newPath = path;
+//             if (path.startsWith('professionalSummary')) newPath = path.replace('professionalSummary', 'summary');
+//             if (path.startsWith('workExperience')) newPath = path.replace('workExperience', 'experience');
+
+//             const keys = newPath.split('.');
+//             const newResumeData = structuredClone(prev.resumeData);
+
+//             // Clean up old keys if new ones are being introduced
+//             if (newPath.startsWith('summary') && newResumeData.hasOwnProperty('professionalSummary')) {
+//                 delete newResumeData.professionalSummary;
+//             }
+//             if (newPath.startsWith('experience') && newResumeData.hasOwnProperty('workExperience')) {
+//                 delete newResumeData.workExperience;
+//             }
+
+//             let current = newResumeData;
+//             for (let i = 0; i < keys.length - 1; i++) {
+//                 const key = keys[i];
+//                 const nextKey = keys[i + 1];
+//                 current = current[key] = current[key] || (isNaN(parseInt(nextKey)) ? {} : []);
+//             }
+//             current[keys[keys.length - 1]] = value;
+//             return { ...prev, resumeData: newResumeData };
+//         });
+//     };
+
+//     const handleSaveAndClose = async () => {
+//         if (!resume) return;
+//         setSaving(true);
+//         setError('');
+//         try {
+//             await api.put(`/api/resume/${id}`, { resumeData: resume.resumeData, templateName: resume.templateName });
+//             navigate('/dashboard');
+//         } catch (err) {
+//             setError('Failed to save resume.');
+//         } finally {
+//             setSaving(false);
+//         }
+//     };
+    
+//     const handleImproveWriting = async (path, currentText) => {
+//         if (!currentText || improvingText) return;
+//         setImprovingText(path);
+//         try {
+//             const { data } = await api.post('/api/ai/improve', { text: currentText });
+//             handleDataChange(path, data.improvedText);
+//         } catch (err) {
+//             alert("Could not improve text. Please try again.");
+//         } finally {
+//             setImprovingText(null);
+//         }
+//     };
+    
+//     const handleGetAtsScore = async () => {
+//         if (!resume) return;
+//         setMode('ATS');
+//         setAiLoading(true); setAiResult(null);
+//         try {
+//             const { data } = await api.post('/api/ai/atsscore', { resumeData: resume.resumeData });
+//             setAiResult(data);
+//         } catch (err) {
+//             setAiResult({ error: err.response?.data?.message || 'Could not get ATS score.' });
+//         } finally {
+//             setAiLoading(false);
+//         }
+//     };
+    
+//     const handlePersonalize = async () => {
+//         if (!resume || !jobDescription.trim()) { alert("Please paste a job description first."); return; }
+//         setIsJobDescVisible(false);
+//         setAiLoading(true); setAiResult(null);
+//         try {
+//             const { data } = await api.post('/api/ai/personalize', { resumeData: resume.resumeData, jobDescription });
+//             setAiResult(data);
+//         } catch (err) {
+//             setAiResult({ error: err.response?.data?.message || 'Error personalizing resume.' });
+//         } finally {
+//             setAiLoading(false);
+//         }
+//     };
+    
+//     const addArrayItem = (sectionKey, defaultItem = {}) => {
+//         if (!resume) return;
+//         const currentItems = resume.resumeData[sectionKey] || [];
+//         handleDataChange(sectionKey, [...currentItems, defaultItem]);
+//     };
+//     const removeArrayItem = (sectionKey, index) => {
+//         if (!resume) return;
+//         const currentData = resume.resumeData[sectionKey] ?? resume.resumeData[sectionKey === 'experience' ? 'workExperience' : 'professionalSummary'];
+//         handleDataChange(sectionKey, currentData.filter((_, i) => i !== index));
+//     };
+    
+//     const addSection = (name, type) => {
+//         const newSectionKey = name.toLowerCase().replace(/\s+/g, '');
+//         const newSections = [...(resume.resumeData.sections || []), { key: newSectionKey, title: name, isCustom: true, type }];
+        
+//         const newResumeData = { ...resume.resumeData };
+//         if (type === 'list-with-bullets') {
+//             newResumeData[newSectionKey] = [{ title: '', subtitle: '', bulletPoints: [''] }];
+//         } else if (type === 'single-text-area') {
+//             newResumeData[newSectionKey] = '';
+//         } else if (type === 'single-input-and-description') {
+//             newResumeData[newSectionKey] = [{ title: '', description: '' }];
+//         }
+        
+//         setResume(prev => ({ ...prev, resumeData: {...newResumeData, sections: newSections} }));
+//     };
+
+//     // --- FIX: Corrected the deleteSection function to prevent race conditions ---
+//     const deleteSection = (sectionKey) => {
+//         if (!resume || !window.confirm('Are you sure you want to delete this entire section?')) return;
+//         setResume(prev => {
+//             const newResumeData = structuredClone(prev.resumeData);
+//             newResumeData.sections = newResumeData.sections.filter(sec => sec.key !== sectionKey);
+//             delete newResumeData[sectionKey];
+//             return { ...prev, resumeData: newResumeData };
+//         });
+//     };
+
+//     const moveSection = (index, direction) => {
+//         if (!resume) return;
+//         const sections = [...resume.resumeData.sections];
+//         const newIndex = index + direction;
+//         if (newIndex < 0 || newIndex >= sections.length) return;
+//         const [movedSection] = sections.splice(index, 1);
+//         sections.splice(newIndex, 0, movedSection);
+//         handleDataChange('sections', sections);
+//     };
+
+//     // --- RENDER METHODS FOR EACH SECTION ---
+    
+//     const renderPersonalDetails = () => (
+//         <div className={styles.sectionFields}>
+//             <div className={styles.inputGroup}>
+//                 <label>Your Name</label>
+//                 <AiInputField path="personalDetails.name" value={resume.resumeData.personalDetails?.name} placeholder="Pavan Sai Kumar" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//             </div>
+//             <div className={styles.inputGroup}>
+//                 <label>Professional Title</label>
+//                 <AiInputField path="personalDetails.professionalTitle" value={resume.resumeData.personalDetails?.professionalTitle} placeholder="Professional Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//             </div>
+//              <div className={styles.inputGroup}>
+//                 <label>Email Address</label>
+//                 <AiInputField path="personalDetails.email" value={resume.resumeData.personalDetails?.email} placeholder="your.email@example.com" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="email" />
+//             </div>
+//             <div className={styles.inputGroup}>
+//                 <label>Phone Number</label>
+//                 <AiInputField path="personalDetails.phone" value={resume.resumeData.personalDetails?.phone} placeholder="123-456-7890" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="tel" />
+//             </div>
+//             <div className={styles.inputGroup}>
+//                 <label>LinkedIn</label>
+//                 <AiInputField path="personalDetails.linkedin" value={resume.resumeData.personalDetails?.linkedin} placeholder="linkedin.com/in/yourprofile" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//             </div>
+//             <div className={styles.inputGroup}>
+//                 <label>GitHub URL</label>
+//                 <AiInputField path="personalDetails.github" value={resume.resumeData.personalDetails?.github} placeholder="github.com/yourusername" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//             </div>
+//         </div>
+//     );
+
+//     const renderProfessionalSummary = () => (
+//         <div className={styles.sectionFields}>
+//             <label>Professional Summary</label>
+//             <AiInputField 
+//                 path="summary"
+//                 value={resume.resumeData.summary ?? resume.resumeData.professionalSummary} 
+//                 placeholder="A brief professional summary about you. Highlight your key skills and career goals." 
+//                 onChange={handleDataChange} 
+//                 onImprove={handleImproveWriting} 
+//                 improvingPath={improvingText} 
+//                 type="textarea" />
+//         </div>
+//     );
+
+//     const renderWorkExperience = () => {
+//         const experienceItems = resume.resumeData.experience ?? resume.resumeData.workExperience;
+//         return (
+//             <div className={styles.sectionFields}>
+//                 {(experienceItems || []).map((exp, index) => (
+//                     <div key={index} className={styles.subsection}>
+//                         <div className={styles.subsectionHeader}>
+//                             <h4>{exp.jobTitle || `Work Experience ${index + 1}`}</h4>
+//                             <button onClick={() => removeArrayItem('experience', index)}><FiTrash2 /></button>
+//                         </div>
+//                         <AiInputField path={`experience.${index}.jobTitle`} value={exp.jobTitle} placeholder="Job Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                         <AiInputField path={`experience.${index}.company`} value={exp.company} placeholder="Company Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                         <AiInputField path={`experience.${index}.location`} value={exp.location} placeholder="City, State" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                         <AiInputField path={`experience.${index}.duration`} value={exp.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                         <label>Description</label>
+//                         <AiInputField path={`experience.${index}.description`} value={exp.description} placeholder="A short description of your responsibilities in this role." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />
+//                     </div>
+//                 ))}
+//                 <button onClick={() => addArrayItem('experience', {})} className={styles.addButton}>
+//                     <FiPlus /> Add Experience
+//                 </button>
+//             </div>
+//         );
+//     }
+
+//     const renderProjects = () => (
+//         <div className={styles.sectionFields}>
+//             {(resume.resumeData.projects || []).map((project, index) => (
+//                 <div key={index} className={styles.subsection}>
+//                     <div className={styles.subsectionHeader}>
+//                         <h4>{project.projectTitle || `Project ${index + 1}`}</h4>
+//                         <button onClick={() => removeArrayItem('projects', index)}><FiTrash2 /></button>
+//                     </div>
+//                     <AiInputField path={`projects.${index}.projectTitle`} value={project.projectTitle} placeholder="Project Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                     <AiInputField path={`projects.${index}.description`} value={project.description} placeholder="A brief overview of the project, its purpose, and the technologies used." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />
+//                     <div className={styles.bulletPoints}>
+//                         {(project.bulletPoints || []).map((point, bulletIndex) => (
+//                             <div key={bulletIndex} className={styles.bulletItem}>
+//                                 <AiInputField path={`projects.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="A specific feature you implemented or a problem you solved." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                                 <button onClick={() => removeArrayItem(`projects.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button>
+//                             </div>
+//                         ))}
+//                         <button onClick={() => addArrayItem(`projects.${index}.bulletPoints`, '')} className={styles.addButton}>
+//                             <FiPlus /> Add Bullet Point
+//                         </button>
+//                     </div>
+//                 </div>
+//             ))}
+//             <button onClick={() => addArrayItem('projects', {})} className={styles.addButton}>
+//                 <FiPlus /> Add Project
+//             </button>
+//         </div>
+//     );
+
+//     const renderEducation = () => (
+//         <div className={styles.sectionFields}>
+//             {(resume.resumeData.education || []).map((edu, index) => (
+//                 <div key={index} className={styles.subsection}>
+//                     <div className={styles.subsectionHeader}>
+//                         <h4>{edu.universityName || `Education ${index + 1}`}</h4>
+//                         <button onClick={() => removeArrayItem('education', index)}><FiTrash2 /></button>
+//                     </div>
+//                     <div className={styles.inputRow}>
+//                         <AiInputField path={`education.${index}.universityName`} value={edu.universityName} placeholder="University Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                         <AiInputField path={`education.${index}.degree`} value={edu.degree} placeholder="Your Degree" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                     </div>
+//                     <AiInputField path={`education.${index}.duration`} value={edu.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                 </div>
+//             ))}
+//             <button onClick={() => addArrayItem('education', {})} className={styles.addButton}>
+//                 <FiPlus /> Add Education
+//             </button>
+//         </div>
+//     );
+
+//     const renderSkills = () => (
+//         <div className={styles.sectionFields}>
+//             {(resume.resumeData.skills || []).map((skillGroup, index) => (
+//                 <div key={index} className={styles.subsection}>
+//                     <div className={styles.subsectionHeader}>
+//                         <h4>{`Skill Group ${index + 1}`}</h4>
+//                         <button onClick={() => removeArrayItem('skills', index)}><FiTrash2 /></button>
+//                     </div>
+//                     <AiInputField path={`skills.${index}`} value={skillGroup} placeholder="Programming, C++, Data Structures & Algorithms..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                 </div>
+//             ))}
+//             <button onClick={() => addArrayItem('skills', '')} className={styles.addButton}>
+//                 <FiPlus /> Add Skill Group
+//             </button>
+//         </div>
+//     );
+
+//     const renderCustomSection = (section) => (
+//         <div className={styles.sectionFields}>
+//             {section.type === 'list-with-bullets' ? (
+//                 <>
+//                     {(resume.resumeData[section.key] || []).map((item, index) => (
+//                         <div key={index} className={styles.subsection}>
+//                             <div className={styles.subsectionHeader}>
+//                                 <h4>{item.title || `${section.title} ${index + 1}`}</h4>
+//                                 <button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button>
+//                             </div>
+//                             <AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                             <AiInputField path={`${section.key}.${index}.subtitle`} value={item.subtitle} placeholder={`${section.title} Subtitle`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                             <div className={styles.bulletPoints}>
+//                                 {(item.bulletPoints || []).map((point, bulletIndex) => (
+//                                     <div key={bulletIndex} className={styles.bulletItem}>
+//                                         <AiInputField path={`${section.key}.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="Bullet Point" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                                         <button onClick={() => removeArrayItem(`${section.key}.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button>
+//                                     </div>
+//                                 ))}
+//                                 <button onClick={() => addArrayItem(`${section.key}.${index}.bulletPoints`, '')} className={styles.addButton}>
+//                                     <FiPlus /> Add Bullet Point
+//                                 </button>
+//                             </div>
+//                         </div>
+//                     ))}
+//                     <button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}>
+//                         <FiPlus /> Add {section.title}
+//                     </button>
+//                 </>
+//             ) : section.type === 'single-text-area' ? (
+//                 <AiInputField path={section.key} value={resume.resumeData[section.key]} placeholder={`Enter details for ${section.title}`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />
+//             ) : section.type === 'single-input-and-description' ? (
+//                 <>
+//                     {(resume.resumeData[section.key] || []).map((item, index) => (
+//                         <div key={index} className={styles.subsection}>
+//                             <div className={styles.subsectionHeader}>
+//                                 <h4>{item.title || `${section.title} ${index + 1}`}</h4>
+//                                 <button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button>
+//                             </div>
+//                             <AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
+//                             <AiInputField path={`${section.key}.${index}.description`} value={item.description} placeholder="Description" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />
+//                         </div>
+//                     ))}
+//                     <button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}>
+//                         <FiPlus /> Add {section.title}
+//                     </button>
+//                 </>
+//             ) : null}
+//         </div>
+//     );
+
+//     const renderEditorPanel = () => (
+//         <>
+//             <div className={styles.panelContent}>
+//                 <header className={styles.header}>
+//                     <h2 className={styles.title}>{resume.resumeData.personalDetails?.name || 'Untitled Resume'}</h2>
+//                     <button onClick={() => setIsAddSectionModalOpen(true)} className={styles.actionButton}><FiPlus /> Add Section</button>
+//                 </header>
+                
+//                 {/* --- FIX: Added backward compatibility for section keys --- */}
+//                 {(resume.resumeData.sections || []).map((section, index) => (
+//                     <Section
+//                         key={`${section.key}-${index}`}
+//                         title={section.title}
+//                         sectionControls={
+//                             <>
+//                                 <button onClick={(e) => { e.stopPropagation(); moveSection(index, -1); }} disabled={index === 0} title="Move Up"><FiArrowUp /></button>
+//                                 <button onClick={(e) => { e.stopPropagation(); moveSection(index, 1); }} disabled={index === resume.resumeData.sections.length - 1} title="Move Down"><FiArrowDown /></button>
+//                                 {section.isCustom && <button onClick={(e) => { e.stopPropagation(); deleteSection(section.key); }} title="Delete Section"><FiTrash2/></button>}
+//                             </>
+//                         }
+//                     >
+//                         {section.key === 'personalDetails' && renderPersonalDetails()}
+//                         {(section.key === 'summary' || section.key === 'professionalSummary') && renderProfessionalSummary()}
+//                         {(section.key === 'experience' || section.key === 'workExperience') && renderWorkExperience()}
+//                         {section.key === 'projects' && renderProjects()}
+//                         {section.key === 'education' && renderEducation()}
+//                         {section.key === 'skills' && renderSkills()}
+//                         {section.isCustom && renderCustomSection(section)}
+//                     </Section>
+//                 ))}
+//             </div>
+//             {isAddSectionModalOpen && <AddSectionModal onAddSection={addSection} onClose={() => setIsAddSectionModalOpen(false)} />}
+//         </>
+//     );
+
+//     const renderAiPanel = () => {
+//         if (mode === 'ATS') {
+//             return (
+//                 <div className={`${styles.aiPanel} ${styles.panelContent}`}>
+//                     <h2>ATS Score & Analysis</h2>
+//                     {aiLoading ? <div className={styles.centeredMessage}>Analyzing...</div> : aiResult && (
+//                         <div className={styles.aiResults}>
+//                             {aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}
+//                             {aiResult.score !== undefined && (
+//                                 <div className={styles.scoreCircle} style={{'--score': `${aiResult.score * 3.6}deg`}}>
+//                                     <span>{aiResult.score}<small>/100</small></span>
+//                                 </div>
+//                             )}
+//                             {aiResult.summary && <p className={styles.summary}>{aiResult.summary}</p>}
+//                             {aiResult.suggestions && (
+//                                 <div className={styles.aiFeedbackSection}>
+//                                     <h3>Actionable Suggestions</h3>
+//                                     <ul className={styles.suggestionList}>
+//                                         {aiResult.suggestions.map((s, i) => <li key={i}><FiCheckCircle /> {s}</li>)}
+//                                     </ul>
+//                                 </div>
+//                             )}
+//                         </div>
+//                     )}
+//                 </div>
+//             )
+//         }
+//         if (mode === 'PERSONALIZE') {
+//             return (
+//                  <div className={`${styles.aiPanel} ${styles.panelContent}`}>
+//                     <div className={styles.jobDescriptionContainer}>
+//                         <div className={styles.jobDescriptionHeader} onClick={() => setIsJobDescVisible(!isJobDescVisible)}>
+//                             <h3><FiFileText /> Job Description</h3>
+//                             <FiChevronDown className={`${styles.chevron} ${isJobDescVisible ? styles.open : ''}`} />
+//                         </div>
+//                         {isJobDescVisible && (
+//                             <div className={styles.jobDescriptionContent}>
+//                             <textarea
+//                                 value={jobDescription}
+//                                 onChange={(e) => setJobDescription(e.target.value)}
+//                                 placeholder="Paste the full job description here..."
+//                             />
+//                             <button onClick={handlePersonalize} disabled={aiLoading} className={styles.aiActionButton}>
+//                                 {aiLoading ? 'Personalizing...' : <><FiZap /> Personalize Resume</>}
+//                             </button>
+//                             </div>
+//                         )}
+//                     </div>
+//                     <div className={styles.aiResults}>
+//                         {aiLoading && <div className={styles.centeredMessage}>Our AI is crafting your personalized feedback...</div>}
+//                         {aiResult && !aiLoading && (
+//                             <>
+//                                 {aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}
+//                                 {aiResult.strategicFeedback && (
+//                                     <div className={styles.aiFeedbackSection}>
+//                                         <h3><FiStar/> Strategic Feedback</h3>
+//                                         <p>{aiResult.strategicFeedback}</p>
+//                                     </div>
+//                                 )}
+//                                  <pre>{JSON.stringify(aiResult, null, 2)}</pre>
+//                             </>
+//                         )}
+//                     </div>
+//                 </div>
+//             )
+//         }
+//         return null;
+//     }
+
+//     const renderPreviewPanel = () => (
+//         <div className={styles.previewPanel}>
+//             <div className={styles.previewHeader}>
+//                 <h3>Live Preview</h3>
+//                 <button onClick={() => updatePreview(resume)} disabled={previewLoading} className={styles.updatePreviewButton}>
+//                     <FiRefreshCw className={previewLoading ? styles.spinning : ''} />
+//                     <span>Refresh</span>
+//                 </button>
+//             </div>
+//             <div className={styles.pdfViewer}>
+//                 {error && <div className={styles.centeredMessage}>{error}</div>}
+//                 {!error && pdfUrl && <iframe src={pdfUrl} title="Resume Preview" className={styles.pdfPreview} />}
+//                 {!error && !pdfUrl && <div className={styles.centeredMessage}>{previewLoading ? 'Generating...' : 'No Preview Available'}</div>}
+//             </div>
+//         </div>
+//     );
+
+//     if (loading || !resume) return <div className={styles.centeredMessage}>Loading Editor...</div>;
+    
+//     return (
+//         <div className={styles.editorLayout}>
+//             <header className={styles.controlsHeader}>
+//                 <div className={styles.controls}>
+//                     <button onClick={() => setMode('EDIT')} className={mode === 'EDIT' ? styles.active : ''}>Edit</button>
+//                     <button onClick={handleGetAtsScore} className={mode === 'ATS' ? styles.active : ''}>ATS Score</button>
+//                     <button onClick={() => { setMode('PERSONALIZE'); setAiResult(null); }} className={mode === 'PERSONALIZE' ? styles.active : ''}>Personalize</button>
+//                     <button onClick={handleSaveAndClose} disabled={saving} className={styles.saveButton}>
+//                         <FiSave /> {saving ? 'Saving...' : 'Save & Close'}
+//                     </button>
+//                 </div>
+//             </header>
+
+//             <main className={styles.leftPanelContainer}>
+//                 {(mode === 'EDIT' || mode === 'PERSONALIZE') ? renderEditorPanel() : renderAiPanel()}
+//             </main>
+            
+//             <aside className={styles.rightPanelContainer}>
+//                 {(mode === 'EDIT' || mode === 'ATS') ? renderPreviewPanel() : renderAiPanel()}
+//             </aside>
+//         </div>
+//     );
+// };
+
+// export default ResumeEditor;
+
+
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '../api/api';
+import styles from './resumeeditor.module.css';
+import { FiSave, FiPlus, FiTrash2, FiEdit, FiArrowUp, FiArrowDown, FiRefreshCw, FiChevronDown, FiStar, FiZap, FiFileText, FiCheckCircle, FiBold } from 'react-icons/fi';
+
+// New component for adding a custom section
+const AddSectionModal = ({ onAddSection, onClose }) => {
+    const [sectionName, setSectionName] = useState('');
+    const [sectionType, setSectionType] = useState('list-with-bullets');
+
+    const handleAdd = () => {
+        if (sectionName.trim()) {
+            onAddSection(sectionName, sectionType);
+            onClose();
+        }
+    };
+
+    return (
+        <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+                <h3>Add New Section</h3>
+                <label>Section Name:</label>
+                <input
+                    type="text"
+                    value={sectionName}
+                    onChange={(e) => setSectionName(e.target.value)}
+                    placeholder="e.g., Certifications, Volunteer Work"
+                />
+                <label>Section Type:</label>
+                <select value={sectionType} onChange={(e) => setSectionType(e.target.value)}>
+                    <option value="list-with-bullets">List with Bullet Points</option>
+                    <option value="single-input-and-description">Single Box with Description</option>
+                    <option value="single-text-area">Single Text Area</option>
+                </select>
+                <div className={styles.modalActions}>
+                    <button onClick={onClose} className={styles.cancelButton}>Cancel</button>
+                    <button onClick={handleAdd} className={styles.addButton}>Add Section</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// A re-usable input component with bold and AI enhancement buttons
+const AiInputField = ({ path, value, placeholder, onChange, onImprove, improvingPath, type = 'input' }) => {
+    const isImproving = improvingPath === path;
+    const InputComponent = type === 'textarea' ? 'textarea' : 'input';
+
+    const handleBoldClick = () => {
+        const textToBold = window.getSelection().toString();
+        if (textToBold && value) {
+            const newText = value.replace(textToBold, `**${textToBold}**`);
+            onChange(path, newText);
+        }
+    };
+
+    return (
+        <div className={styles.inputWithAi}>
+            <InputComponent
+                type={type === 'textarea' ? undefined : type}
+                placeholder={placeholder}
+                value={value || ''}
+                onChange={e => onChange(path, e.target.value)}
+                className={styles.inputField}
+            />
+            <div className={styles.inputControls}>
+                <button
+                    onClick={handleBoldClick}
+                    className={styles.boldButton}
+                    title="Bold selected text"
+                >
+                    <FiBold />
+                </button>
+                <button
+                    onClick={() => onImprove(path, value)}
+                    className={styles.aiButton}
+                    title="Improve Writing with AI"
+                    disabled={isImproving}
+                >
+                    {isImproving ? <FiRefreshCw className={styles.spinning} /> : <FiEdit />}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// Collapsible Section Component
+const Section = ({ title, children, sectionControls }) => {
+    const [isOpen, setIsOpen] = useState(true);
+    return (
+        <div className={`${styles.formSection} ${isOpen ? styles.open : ''}`}>
+            <div className={styles.sectionHeader} onClick={() => setIsOpen(!isOpen)}>
+                <h3>{title}</h3>
+                <div className={styles.sectionControls}>
+                    {sectionControls}
+                    <FiChevronDown className={styles.chevron} />
+                </div>
+            </div>
+            <div className={styles.sectionContent}>{children}</div>
+        </div>
+    );
+};
+
+const ResumeEditor = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+
+    const [resume, setResume] = useState(null);
+    const [pdfUrl, setPdfUrl] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [previewLoading, setPreviewLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [mode, setMode] = useState('EDIT');
+    const [jobDescription, setJobDescription] = useState('');
+    const [aiResult, setAiResult] = useState(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [improvingText, setImprovingText] = useState(null);
+    const [isJobDescVisible, setIsJobDescVisible] = useState(true);
+    const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
+
+
+    const updatePreview = useCallback(async (currentResume) => {
+        if (!id || !currentResume) return;
+        setPreviewLoading(true);
+        setError('');
+        try {
+            const response = await api.post(`/api/resume/preview/${id}`, {
+                resumeData: currentResume.resumeData,
+                templateName: currentResume.templateName
+            }, { responseType: 'blob' });
+
+            const newPdfUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            setPdfUrl(prevUrl => {
+                if (prevUrl) window.URL.revokeObjectURL(prevUrl);
+                return newPdfUrl;
+            });
+        } catch (err) {
+            console.error("Preview Error:", err);
+            setError("Failed to generate PDF preview.");
+        } finally {
+            setPreviewLoading(false);
+        }
+    }, [id]);
+
+    useEffect(() => {
+        const fetchResumeData = async () => {
+            if (!id) { navigate('/dashboard'); return; }
+            setLoading(true);
+            try {
+                const { data } = await api.get(`/api/resume/${id}`);
+                setResume(data);
+            } catch (err) {
+                setError('Failed to load resume data.');
+                navigate('/dashboard');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchResumeData();
+
+        return () => { if (pdfUrl) { window.URL.revokeObjectURL(pdfUrl); } };
+    }, [id, navigate]);
+
+    useEffect(() => {
+        if (resume) {
+            const handler = setTimeout(() => {
+                updatePreview(resume);
+            }, 500);
+            return () => clearTimeout(handler);
+        }
+    }, [resume, updatePreview]);
+
+    const handleDataChange = (path, value) => {
+        setResume(prev => {
+            if (!prev) return null;
+            
+            let newPath = path;
+            if (path.startsWith('professionalSummary')) newPath = path.replace('professionalSummary', 'summary');
+            if (path.startsWith('workExperience')) newPath = path.replace('workExperience', 'experience');
+
+            const keys = newPath.split('.');
+            const newResumeData = structuredClone(prev.resumeData);
+
+            if (newPath.startsWith('summary') && newResumeData.hasOwnProperty('professionalSummary')) {
+                delete newResumeData.professionalSummary;
+            }
+            if (newPath.startsWith('experience') && newResumeData.hasOwnProperty('workExperience')) {
+                delete newResumeData.workExperience;
+            }
+
+            let current = newResumeData;
+            for (let i = 0; i < keys.length - 1; i++) {
+                const key = keys[i];
+                const nextKey = keys[i + 1];
+                current = current[key] = current[key] || (isNaN(parseInt(nextKey)) ? {} : []);
+            }
+            current[keys[keys.length - 1]] = value;
+            return { ...prev, resumeData: newResumeData };
+        });
+    };
+
+    const handleSaveAndClose = async () => {
+        if (!resume) return;
+        setSaving(true);
+        setError('');
+        try {
+            await api.put(`/api/resume/${id}`, { resumeData: resume.resumeData, templateName: resume.templateName });
+            navigate('/dashboard');
+        } catch (err) {
+            setError('Failed to save resume.');
+        } finally {
+            setSaving(false);
+        }
+    };
+    
+    const handleImproveWriting = async (path, currentText) => {
+        if (!currentText || improvingText) return;
+        setImprovingText(path);
+        try {
+            const { data } = await api.post('/api/ai/improve', { text: currentText });
+            handleDataChange(path, data.improvedText);
+        } catch (err) {
+            alert("Could not improve text. Please try again.");
+        } finally {
+            setImprovingText(null);
+        }
+    };
+    
+    const handleGetAtsScore = async () => {
+        if (!resume) return;
+        setMode('ATS');
+        setAiLoading(true); setAiResult(null);
+        try {
+            const { data } = await api.post('/api/ai/atsscore', { resumeData: resume.resumeData });
+            setAiResult(data);
+        } catch (err) {
+            setAiResult({ error: err.response?.data?.message || 'Could not get ATS score.' });
+        } finally {
+            setAiLoading(false);
+        }
+    };
+    
+    const handlePersonalize = async () => {
+        if (!resume || !jobDescription.trim()) { alert("Please paste a job description first."); return; }
+        setIsJobDescVisible(false);
+        setAiLoading(true); setAiResult(null);
+        try {
+            const { data } = await api.post('/api/ai/personalize', { resumeData: resume.resumeData, jobDescription });
+            setAiResult(data);
+        } catch (err) {
+            setAiResult({ error: err.response?.data?.message || 'Error personalizing resume.' });
+        } finally {
+            setAiLoading(false);
+        }
+    };
+    
+    const addArrayItem = (sectionKey, defaultItem = {}) => {
+        if (!resume) return;
+        const currentItems = resume.resumeData[sectionKey] || [];
+        handleDataChange(sectionKey, [...currentItems, defaultItem]);
+    };
+
+    const removeArrayItem = (sectionKey, index) => {
+        if (!resume) return;
+        const currentData = resume.resumeData[sectionKey] ?? resume.resumeData[sectionKey === 'experience' ? 'workExperience' : 'professionalSummary'];
+        handleDataChange(sectionKey, currentData.filter((_, i) => i !== index));
+    };
+    
+    const addSection = (name, type) => {
+        const newSectionKey = name.toLowerCase().replace(/\s+/g, '');
+        const newSections = [...(resume.resumeData.sections || []), { key: newSectionKey, title: name, isCustom: true, type }];
+        
+        const newResumeData = { ...resume.resumeData };
+        if (type === 'list-with-bullets') {
+            newResumeData[newSectionKey] = [{ title: '', subtitle: '', bulletPoints: [''] }];
+        } else if (type === 'single-text-area') {
+            newResumeData[newSectionKey] = '';
+        } else if (type === 'single-input-and-description') {
+            newResumeData[newSectionKey] = [{ title: '', description: '' }];
+        }
+        
+        setResume(prev => ({ ...prev, resumeData: {...newResumeData, sections: newSections} }));
+    };
+
+    const deleteSection = (sectionKey) => {
+        if (!resume || !window.confirm('Are you sure you want to delete this entire section?')) return;
+        setResume(prev => {
+            const newResumeData = structuredClone(prev.resumeData);
+            newResumeData.sections = newResumeData.sections.filter(sec => sec.key !== sectionKey);
+            delete newResumeData[sectionKey];
+            return { ...prev, resumeData: newResumeData };
+        });
+    };
+
+    const moveSection = (index, direction) => {
+        if (!resume) return;
+        const sections = [...resume.resumeData.sections];
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= sections.length) return;
+        const [movedSection] = sections.splice(index, 1);
+        sections.splice(newIndex, 0, movedSection);
+        handleDataChange('sections', sections);
+    };
+
+    // --- RENDER METHODS ---
+    const renderPersonalDetails = () => (
+        <div className={styles.sectionFields}>
+            <div className={styles.inputGroup}><label>Your Name</label><AiInputField path="personalDetails.name" value={resume.resumeData.personalDetails?.name} placeholder="Pavan Sai Kumar" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
+            <div className={styles.inputGroup}><label>Professional Title</label><AiInputField path="personalDetails.professionalTitle" value={resume.resumeData.personalDetails?.professionalTitle} placeholder="Professional Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
+            <div className={styles.inputGroup}><label>Email Address</label><AiInputField path="personalDetails.email" value={resume.resumeData.personalDetails?.email} placeholder="your.email@example.com" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="email" /></div>
+            <div className={styles.inputGroup}><label>Phone Number</label><AiInputField path="personalDetails.phone" value={resume.resumeData.personalDetails?.phone} placeholder="123-456-7890" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="tel" /></div>
+            <div className={styles.inputGroup}><label>LinkedIn</label><AiInputField path="personalDetails.linkedin" value={resume.resumeData.personalDetails?.linkedin} placeholder="linkedin.com/in/yourprofile" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
+            <div className={styles.inputGroup}><label>GitHub URL</label><AiInputField path="personalDetails.github" value={resume.resumeData.personalDetails?.github} placeholder="github.com/yourusername" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
+        </div>
+    );
+
+    const renderProfessionalSummary = () => (
+        <div className={styles.sectionFields}><label>Professional Summary</label><AiInputField path="summary" value={resume.resumeData.summary ?? resume.resumeData.professionalSummary} placeholder="A brief professional summary about you..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /></div>
+    );
+
+    const renderWorkExperience = () => {
+        const experienceItems = resume.resumeData.experience ?? resume.resumeData.workExperience;
+        return (<div className={styles.sectionFields}>{(experienceItems || []).map((exp, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{exp.jobTitle || `Work Experience ${index + 1}`}</h4><button onClick={() => removeArrayItem('experience', index)}><FiTrash2 /></button></div><AiInputField path={`experience.${index}.jobTitle`} value={exp.jobTitle} placeholder="Job Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`experience.${index}.company`} value={exp.company} placeholder="Company Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`experience.${index}.location`} value={exp.location} placeholder="City, State" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`experience.${index}.duration`} value={exp.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><label>Description</label><AiInputField path={`experience.${index}.description`} value={exp.description} placeholder="A short description of your responsibilities..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /></div>))}<button onClick={() => addArrayItem('experience', {})} className={styles.addButton}><FiPlus /> Add Experience</button></div>);
+    }
+
+    const renderProjects = () => (<div className={styles.sectionFields}>{(resume.resumeData.projects || []).map((project, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{project.projectTitle || `Project ${index + 1}`}</h4><button onClick={() => removeArrayItem('projects', index)}><FiTrash2 /></button></div><AiInputField path={`projects.${index}.projectTitle`} value={project.projectTitle} placeholder="Project Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`projects.${index}.description`} value={project.description} placeholder="A brief overview of the project..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /><div className={styles.bulletPoints}>{(project.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`projects.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="A specific feature you implemented..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`projects.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`projects.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem('projects', {})} className={styles.addButton}><FiPlus /> Add Project</button></div>);
+
+    const renderEducation = () => (<div className={styles.sectionFields}>{(resume.resumeData.education || []).map((edu, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{edu.universityName || `Education ${index + 1}`}</h4><button onClick={() => removeArrayItem('education', index)}><FiTrash2 /></button></div><div className={styles.inputRow}><AiInputField path={`education.${index}.universityName`} value={edu.universityName} placeholder="University Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`education.${index}.degree`} value={edu.degree} placeholder="Your Degree" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div><AiInputField path={`education.${index}.duration`} value={edu.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>))}<button onClick={() => addArrayItem('education', {})} className={styles.addButton}><FiPlus /> Add Education</button></div>);
+
+    const renderSkills = () => (<div className={styles.sectionFields}>{(resume.resumeData.skills || []).map((skillGroup, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{`Skill Group ${index + 1}`}</h4><button onClick={() => removeArrayItem('skills', index)}><FiTrash2 /></button></div><AiInputField path={`skills.${index}`} value={skillGroup} placeholder="Programming, C++, Data Structures..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>))}<button onClick={() => addArrayItem('skills', '')} className={styles.addButton}><FiPlus /> Add Skill Group</button></div>);
+
+    const renderCustomSection = (section) => (
+        <div className={styles.sectionFields}>
+            {section.type === 'list-with-bullets' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`${section.key}.${index}.subtitle`} value={item.subtitle} placeholder={`${section.title} Subtitle`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><div className={styles.bulletPoints}>{(item.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`${section.key}.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="Bullet Point" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`${section.key}.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`${section.key}.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) : 
+            section.type === 'single-text-area' ? (<AiInputField path={section.key} value={resume.resumeData[section.key]} placeholder={`Enter details for ${section.title}`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />) : 
+            section.type === 'single-input-and-description' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`${section.key}.${index}.description`} value={item.description} placeholder="Description" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /></div>))}<button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) : null}
+        </div>
+    );
+
+    const renderEditorPanel = () => (
+        <><div className={styles.panelContent}><header className={styles.header}><h2 className={styles.title}>{resume.resumeData.personalDetails?.name || 'Untitled Resume'}</h2><button onClick={() => setIsAddSectionModalOpen(true)} className={styles.actionButton}><FiPlus /> Add Section</button></header>{(resume.resumeData.sections || []).map((section, index) => (<Section key={`${section.key}-${index}`} title={section.title} sectionControls={<><button onClick={(e) => { e.stopPropagation(); moveSection(index, -1); }} disabled={index === 0} title="Move Up"><FiArrowUp /></button><button onClick={(e) => { e.stopPropagation(); moveSection(index, 1); }} disabled={index === resume.resumeData.sections.length - 1} title="Move Down"><FiArrowDown /></button>{section.isCustom && <button onClick={(e) => { e.stopPropagation(); deleteSection(section.key); }} title="Delete Section"><FiTrash2/></button>}</>}>{section.key === 'personalDetails' && renderPersonalDetails()}{(section.key === 'summary' || section.key === 'professionalSummary') && renderProfessionalSummary()}{(section.key === 'experience' || section.key === 'workExperience') && renderWorkExperience()}{section.key === 'projects' && renderProjects()}{section.key === 'education' && renderEducation()}{section.key === 'skills' && renderSkills()}{section.isCustom && renderCustomSection(section)}</Section>))}</div>{isAddSectionModalOpen && <AddSectionModal onAddSection={addSection} onClose={() => setIsAddSectionModalOpen(false)} />}</>
+    );
+
+    const renderAiPanel = () => {
+        if (mode === 'ATS') {
+            return (<div className={`${styles.aiPanel} ${styles.panelContent}`}><h2>ATS Score & Analysis</h2>{aiLoading ? <div className={styles.centeredMessage}>Analyzing...</div> : aiResult && (<div className={styles.aiResults}>{aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}{aiResult.score !== undefined && (<div className={styles.scoreCircle} style={{'--score': `${aiResult.score * 3.6}deg`}}><span>{aiResult.score}<small>/100</small></span></div>)}{aiResult.summary && <p className={styles.summary}>{aiResult.summary}</p>}{aiResult.suggestions && (<div className={styles.aiFeedbackSection}><h3>Actionable Suggestions</h3><ul className={styles.suggestionList}>{aiResult.suggestions.map((s, i) => <li key={i}><FiCheckCircle /> {s}</li>)}</ul></div>)}</div>)}</div>)
+        }
+        if (mode === 'PERSONALIZE') {
+            return (<div className={`${styles.aiPanel} ${styles.panelContent}`}><div className={styles.jobDescriptionContainer}><div className={styles.jobDescriptionHeader} onClick={() => setIsJobDescVisible(!isJobDescVisible)}><h3><FiFileText /> Job Description</h3><FiChevronDown className={`${styles.chevron} ${isJobDescVisible ? styles.open : ''}`} /></div>{isJobDescVisible && (<div className={styles.jobDescriptionContent}><textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the full job description here..." /><button onClick={handlePersonalize} disabled={aiLoading} className={styles.aiActionButton}>{aiLoading ? 'Personalizing...' : <><FiZap /> Personalize Resume</>}</button></div>)}</div><div className={styles.aiResults}>{aiLoading && <div className={styles.centeredMessage}>Our AI is crafting your personalized feedback...</div>}{aiResult && !aiLoading && (<>{aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}{aiResult.strategicFeedback && (<div className={styles.aiFeedbackSection}><h3><FiStar/> Strategic Feedback</h3><p>{aiResult.strategicFeedback}</p></div>)}<pre>{JSON.stringify(aiResult, null, 2)}</pre></>)}</div></div>)
+        }
+        return null;
+    }
+
+    const renderPreviewPanel = () => (
+        <div className={styles.previewPanel}><div className={styles.previewHeader}><h3>Live Preview</h3><button onClick={() => updatePreview(resume)} disabled={previewLoading} className={styles.updatePreviewButton}><FiRefreshCw className={previewLoading ? styles.spinning : ''} /><span>Refresh</span></button></div><div className={styles.pdfViewer}>{error && <div className={styles.centeredMessage}>{error}</div>}{!error && pdfUrl && <iframe src={pdfUrl} title="Resume Preview" className={styles.pdfPreview} />}{!error && !pdfUrl && <div className={styles.centeredMessage}>{previewLoading ? 'Generating...' : 'No Preview Available'}</div>}</div></div>
+    );
+
+    if (loading || !resume) return <div className={styles.centeredMessage}>Loading Editor...</div>;
+    
+    return (
+        <div className={styles.editorLayout}>
+            <header className={styles.controlsHeader}>
+                <div className={styles.controls}>
+                    <button 
+                        onClick={() => setMode('EDIT')} 
+                        className={mode === 'EDIT' ? styles.active : ''}
+                        data-tooltip="Editor"
+                    >
+                        Edit
+                    </button>
+                    <button 
+                        onClick={handleGetAtsScore} 
+                        className={mode === 'ATS' ? styles.active : ''}
+                        data-tooltip="ATS Score & Analysis"
+                    >
+                        ATS Score
+                    </button>
+                    <button 
+                        onClick={() => { setMode('PERSONALIZE'); setAiResult(null); }} 
+                        className={mode === 'PERSONALIZE' ? styles.active : ''}
+                        data-tooltip="Personalize with AI for a Job"
+                    >
+                        Personalize
+                    </button>
+                </div>
+                <button 
+                    onClick={handleSaveAndClose} 
+                    disabled={saving} 
+                    className={styles.saveButton}
+                    data-tooltip="Save and exit"
+                >
+                    <FiSave /> {saving ? 'Saving...' : 'Save & Close'}
+                </button>
+            </header>
+
+            <main className={styles.leftPanelContainer}>
+                {(mode === 'EDIT' || mode === 'PERSONALIZE') ? renderEditorPanel() : renderAiPanel()}
+            </main>
+            
+            <aside className={styles.rightPanelContainer}>
+                {(mode === 'EDIT' || mode === 'ATS') ? renderPreviewPanel() : renderAiPanel()}
+            </aside>
+        </div>
+    );
+};
+
+export default ResumeEditor;
