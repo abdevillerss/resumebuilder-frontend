@@ -1,5 +1,6 @@
 
 
+
 // import React, { useState, useEffect, useCallback } from 'react';
 // import { useParams, useNavigate } from 'react-router-dom';
 // import api from '../api/api';
@@ -178,7 +179,6 @@
 //         setResume(prev => {
 //             if (!prev) return null;
             
-//             // --- FIX: When changing a legacy key, update it to the new key ---
 //             let newPath = path;
 //             if (path.startsWith('professionalSummary')) newPath = path.replace('professionalSummary', 'summary');
 //             if (path.startsWith('workExperience')) newPath = path.replace('workExperience', 'experience');
@@ -186,7 +186,6 @@
 //             const keys = newPath.split('.');
 //             const newResumeData = structuredClone(prev.resumeData);
 
-//             // Clean up old keys if new ones are being introduced
 //             if (newPath.startsWith('summary') && newResumeData.hasOwnProperty('professionalSummary')) {
 //                 delete newResumeData.professionalSummary;
 //             }
@@ -265,6 +264,7 @@
 //         const currentItems = resume.resumeData[sectionKey] || [];
 //         handleDataChange(sectionKey, [...currentItems, defaultItem]);
 //     };
+
 //     const removeArrayItem = (sectionKey, index) => {
 //         if (!resume) return;
 //         const currentData = resume.resumeData[sectionKey] ?? resume.resumeData[sectionKey === 'experience' ? 'workExperience' : 'professionalSummary'];
@@ -287,7 +287,6 @@
 //         setResume(prev => ({ ...prev, resumeData: {...newResumeData, sections: newSections} }));
 //     };
 
-//     // --- FIX: Corrected the deleteSection function to prevent race conditions ---
 //     const deleteSection = (sectionKey) => {
 //         if (!resume || !window.confirm('Are you sure you want to delete this entire section?')) return;
 //         setResume(prev => {
@@ -308,313 +307,57 @@
 //         handleDataChange('sections', sections);
 //     };
 
-//     // --- RENDER METHODS FOR EACH SECTION ---
-    
+//     // --- RENDER METHODS ---
 //     const renderPersonalDetails = () => (
 //         <div className={styles.sectionFields}>
-//             <div className={styles.inputGroup}>
-//                 <label>Your Name</label>
-//                 <AiInputField path="personalDetails.name" value={resume.resumeData.personalDetails?.name} placeholder="Pavan Sai Kumar" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//             </div>
-//             <div className={styles.inputGroup}>
-//                 <label>Professional Title</label>
-//                 <AiInputField path="personalDetails.professionalTitle" value={resume.resumeData.personalDetails?.professionalTitle} placeholder="Professional Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//             </div>
-//              <div className={styles.inputGroup}>
-//                 <label>Email Address</label>
-//                 <AiInputField path="personalDetails.email" value={resume.resumeData.personalDetails?.email} placeholder="your.email@example.com" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="email" />
-//             </div>
-//             <div className={styles.inputGroup}>
-//                 <label>Phone Number</label>
-//                 <AiInputField path="personalDetails.phone" value={resume.resumeData.personalDetails?.phone} placeholder="123-456-7890" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="tel" />
-//             </div>
-//             <div className={styles.inputGroup}>
-//                 <label>LinkedIn</label>
-//                 <AiInputField path="personalDetails.linkedin" value={resume.resumeData.personalDetails?.linkedin} placeholder="linkedin.com/in/yourprofile" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//             </div>
-//             <div className={styles.inputGroup}>
-//                 <label>GitHub URL</label>
-//                 <AiInputField path="personalDetails.github" value={resume.resumeData.personalDetails?.github} placeholder="github.com/yourusername" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//             </div>
+//             <div className={styles.inputGroup}><label>Your Name</label><AiInputField path="personalDetails.name" value={resume.resumeData.personalDetails?.name} placeholder="Pavan Sai Kumar" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
+//             <div className={styles.inputGroup}><label>Professional Title</label><AiInputField path="personalDetails.professionalTitle" value={resume.resumeData.personalDetails?.professionalTitle} placeholder="Professional Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
+//             <div className={styles.inputGroup}><label>Email Address</label><AiInputField path="personalDetails.email" value={resume.resumeData.personalDetails?.email} placeholder="your.email@example.com" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="email" /></div>
+//             <div className={styles.inputGroup}><label>Phone Number</label><AiInputField path="personalDetails.phone" value={resume.resumeData.personalDetails?.phone} placeholder="123-456-7890" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="tel" /></div>
+//             <div className={styles.inputGroup}><label>LinkedIn</label><AiInputField path="personalDetails.linkedin" value={resume.resumeData.personalDetails?.linkedin} placeholder="linkedin.com/in/yourprofile" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
+//             <div className={styles.inputGroup}><label>GitHub URL</label><AiInputField path="personalDetails.github" value={resume.resumeData.personalDetails?.github} placeholder="github.com/yourusername" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
 //         </div>
 //     );
 
 //     const renderProfessionalSummary = () => (
-//         <div className={styles.sectionFields}>
-//             <label>Professional Summary</label>
-//             <AiInputField 
-//                 path="summary"
-//                 value={resume.resumeData.summary ?? resume.resumeData.professionalSummary} 
-//                 placeholder="A brief professional summary about you. Highlight your key skills and career goals." 
-//                 onChange={handleDataChange} 
-//                 onImprove={handleImproveWriting} 
-//                 improvingPath={improvingText} 
-//                 type="textarea" />
-//         </div>
+//         <div className={styles.sectionFields}><label>Professional Summary</label><AiInputField path="summary" value={resume.resumeData.summary ?? resume.resumeData.professionalSummary} placeholder="A brief professional summary about you..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /></div>
 //     );
 
 //     const renderWorkExperience = () => {
 //         const experienceItems = resume.resumeData.experience ?? resume.resumeData.workExperience;
-//         return (
-//             <div className={styles.sectionFields}>
-//                 {(experienceItems || []).map((exp, index) => (
-//                     <div key={index} className={styles.subsection}>
-//                         <div className={styles.subsectionHeader}>
-//                             <h4>{exp.jobTitle || `Work Experience ${index + 1}`}</h4>
-//                             <button onClick={() => removeArrayItem('experience', index)}><FiTrash2 /></button>
-//                         </div>
-//                         <AiInputField path={`experience.${index}.jobTitle`} value={exp.jobTitle} placeholder="Job Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                         <AiInputField path={`experience.${index}.company`} value={exp.company} placeholder="Company Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                         <AiInputField path={`experience.${index}.location`} value={exp.location} placeholder="City, State" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                         <AiInputField path={`experience.${index}.duration`} value={exp.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                         <label>Description</label>
-//                         <AiInputField path={`experience.${index}.description`} value={exp.description} placeholder="A short description of your responsibilities in this role." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />
-//                     </div>
-//                 ))}
-//                 <button onClick={() => addArrayItem('experience', {})} className={styles.addButton}>
-//                     <FiPlus /> Add Experience
-//                 </button>
-//             </div>
-//         );
+//         return (<div className={styles.sectionFields}>{(experienceItems || []).map((exp, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{exp.jobTitle || `Work Experience ${index + 1}`}</h4><button onClick={() => removeArrayItem('experience', index)}><FiTrash2 /></button></div><AiInputField path={`experience.${index}.jobTitle`} value={exp.jobTitle} placeholder="Job Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`experience.${index}.company`} value={exp.company} placeholder="Company Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`experience.${index}.location`} value={exp.location} placeholder="City, State" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`experience.${index}.duration`} value={exp.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><label>Description</label><AiInputField path={`experience.${index}.description`} value={exp.description} placeholder="A short description of your responsibilities..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /></div>))}<button onClick={() => addArrayItem('experience', {})} className={styles.addButton}><FiPlus /> Add Experience</button></div>);
 //     }
 
-//     const renderProjects = () => (
-//         <div className={styles.sectionFields}>
-//             {(resume.resumeData.projects || []).map((project, index) => (
-//                 <div key={index} className={styles.subsection}>
-//                     <div className={styles.subsectionHeader}>
-//                         <h4>{project.projectTitle || `Project ${index + 1}`}</h4>
-//                         <button onClick={() => removeArrayItem('projects', index)}><FiTrash2 /></button>
-//                     </div>
-//                     <AiInputField path={`projects.${index}.projectTitle`} value={project.projectTitle} placeholder="Project Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                     <AiInputField path={`projects.${index}.description`} value={project.description} placeholder="A brief overview of the project, its purpose, and the technologies used." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />
-//                     <div className={styles.bulletPoints}>
-//                         {(project.bulletPoints || []).map((point, bulletIndex) => (
-//                             <div key={bulletIndex} className={styles.bulletItem}>
-//                                 <AiInputField path={`projects.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="A specific feature you implemented or a problem you solved." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                                 <button onClick={() => removeArrayItem(`projects.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button>
-//                             </div>
-//                         ))}
-//                         <button onClick={() => addArrayItem(`projects.${index}.bulletPoints`, '')} className={styles.addButton}>
-//                             <FiPlus /> Add Bullet Point
-//                         </button>
-//                     </div>
-//                 </div>
-//             ))}
-//             <button onClick={() => addArrayItem('projects', {})} className={styles.addButton}>
-//                 <FiPlus /> Add Project
-//             </button>
-//         </div>
-//     );
+//     const renderProjects = () => (<div className={styles.sectionFields}>{(resume.resumeData.projects || []).map((project, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{project.projectTitle || `Project ${index + 1}`}</h4><button onClick={() => removeArrayItem('projects', index)}><FiTrash2 /></button></div><AiInputField path={`projects.${index}.projectTitle`} value={project.projectTitle} placeholder="Project Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`projects.${index}.description`} value={project.description} placeholder="A brief overview of the project..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /><div className={styles.bulletPoints}>{(project.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`projects.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="A specific feature you implemented..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`projects.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`projects.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem('projects', {})} className={styles.addButton}><FiPlus /> Add Project</button></div>);
 
-//     const renderEducation = () => (
-//         <div className={styles.sectionFields}>
-//             {(resume.resumeData.education || []).map((edu, index) => (
-//                 <div key={index} className={styles.subsection}>
-//                     <div className={styles.subsectionHeader}>
-//                         <h4>{edu.universityName || `Education ${index + 1}`}</h4>
-//                         <button onClick={() => removeArrayItem('education', index)}><FiTrash2 /></button>
-//                     </div>
-//                     <div className={styles.inputRow}>
-//                         <AiInputField path={`education.${index}.universityName`} value={edu.universityName} placeholder="University Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                         <AiInputField path={`education.${index}.degree`} value={edu.degree} placeholder="Your Degree" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                     </div>
-//                     <AiInputField path={`education.${index}.duration`} value={edu.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                 </div>
-//             ))}
-//             <button onClick={() => addArrayItem('education', {})} className={styles.addButton}>
-//                 <FiPlus /> Add Education
-//             </button>
-//         </div>
-//     );
+//     const renderEducation = () => (<div className={styles.sectionFields}>{(resume.resumeData.education || []).map((edu, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{edu.universityName || `Education ${index + 1}`}</h4><button onClick={() => removeArrayItem('education', index)}><FiTrash2 /></button></div><div className={styles.inputRow}><AiInputField path={`education.${index}.universityName`} value={edu.universityName} placeholder="University Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`education.${index}.degree`} value={edu.degree} placeholder="Your Degree" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div><AiInputField path={`education.${index}.duration`} value={edu.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>))}<button onClick={() => addArrayItem('education', {})} className={styles.addButton}><FiPlus /> Add Education</button></div>);
 
-//     const renderSkills = () => (
-//         <div className={styles.sectionFields}>
-//             {(resume.resumeData.skills || []).map((skillGroup, index) => (
-//                 <div key={index} className={styles.subsection}>
-//                     <div className={styles.subsectionHeader}>
-//                         <h4>{`Skill Group ${index + 1}`}</h4>
-//                         <button onClick={() => removeArrayItem('skills', index)}><FiTrash2 /></button>
-//                     </div>
-//                     <AiInputField path={`skills.${index}`} value={skillGroup} placeholder="Programming, C++, Data Structures & Algorithms..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                 </div>
-//             ))}
-//             <button onClick={() => addArrayItem('skills', '')} className={styles.addButton}>
-//                 <FiPlus /> Add Skill Group
-//             </button>
-//         </div>
-//     );
+//     const renderSkills = () => (<div className={styles.sectionFields}>{(resume.resumeData.skills || []).map((skillGroup, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{`Skill Group ${index + 1}`}</h4><button onClick={() => removeArrayItem('skills', index)}><FiTrash2 /></button></div><AiInputField path={`skills.${index}`} value={skillGroup} placeholder="Programming, C++, Data Structures..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>))}<button onClick={() => addArrayItem('skills', '')} className={styles.addButton}><FiPlus /> Add Skill Group</button></div>);
 
 //     const renderCustomSection = (section) => (
 //         <div className={styles.sectionFields}>
-//             {section.type === 'list-with-bullets' ? (
-//                 <>
-//                     {(resume.resumeData[section.key] || []).map((item, index) => (
-//                         <div key={index} className={styles.subsection}>
-//                             <div className={styles.subsectionHeader}>
-//                                 <h4>{item.title || `${section.title} ${index + 1}`}</h4>
-//                                 <button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button>
-//                             </div>
-//                             <AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                             <AiInputField path={`${section.key}.${index}.subtitle`} value={item.subtitle} placeholder={`${section.title} Subtitle`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                             <div className={styles.bulletPoints}>
-//                                 {(item.bulletPoints || []).map((point, bulletIndex) => (
-//                                     <div key={bulletIndex} className={styles.bulletItem}>
-//                                         <AiInputField path={`${section.key}.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="Bullet Point" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                                         <button onClick={() => removeArrayItem(`${section.key}.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button>
-//                                     </div>
-//                                 ))}
-//                                 <button onClick={() => addArrayItem(`${section.key}.${index}.bulletPoints`, '')} className={styles.addButton}>
-//                                     <FiPlus /> Add Bullet Point
-//                                 </button>
-//                             </div>
-//                         </div>
-//                     ))}
-//                     <button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}>
-//                         <FiPlus /> Add {section.title}
-//                     </button>
-//                 </>
-//             ) : section.type === 'single-text-area' ? (
-//                 <AiInputField path={section.key} value={resume.resumeData[section.key]} placeholder={`Enter details for ${section.title}`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />
-//             ) : section.type === 'single-input-and-description' ? (
-//                 <>
-//                     {(resume.resumeData[section.key] || []).map((item, index) => (
-//                         <div key={index} className={styles.subsection}>
-//                             <div className={styles.subsectionHeader}>
-//                                 <h4>{item.title || `${section.title} ${index + 1}`}</h4>
-//                                 <button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button>
-//                             </div>
-//                             <AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} />
-//                             <AiInputField path={`${section.key}.${index}.description`} value={item.description} placeholder="Description" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />
-//                         </div>
-//                     ))}
-//                     <button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}>
-//                         <FiPlus /> Add {section.title}
-//                     </button>
-//                 </>
-//             ) : null}
+//             {section.type === 'list-with-bullets' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`${section.key}.${index}.subtitle`} value={item.subtitle} placeholder={`${section.title} Subtitle`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><div className={styles.bulletPoints}>{(item.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`${section.key}.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="Bullet Point" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`${section.key}.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`${section.key}.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) : 
+//             section.type === 'single-text-area' ? (<AiInputField path={section.key} value={resume.resumeData[section.key]} placeholder={`Enter details for ${section.title}`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />) : 
+//             section.type === 'single-input-and-description' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`${section.key}.${index}.description`} value={item.description} placeholder="Description" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /></div>))}<button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) : null}
 //         </div>
 //     );
 
 //     const renderEditorPanel = () => (
-//         <>
-//             <div className={styles.panelContent}>
-//                 <header className={styles.header}>
-//                     <h2 className={styles.title}>{resume.resumeData.personalDetails?.name || 'Untitled Resume'}</h2>
-//                     <button onClick={() => setIsAddSectionModalOpen(true)} className={styles.actionButton}><FiPlus /> Add Section</button>
-//                 </header>
-                
-//                 {/* --- FIX: Added backward compatibility for section keys --- */}
-//                 {(resume.resumeData.sections || []).map((section, index) => (
-//                     <Section
-//                         key={`${section.key}-${index}`}
-//                         title={section.title}
-//                         sectionControls={
-//                             <>
-//                                 <button onClick={(e) => { e.stopPropagation(); moveSection(index, -1); }} disabled={index === 0} title="Move Up"><FiArrowUp /></button>
-//                                 <button onClick={(e) => { e.stopPropagation(); moveSection(index, 1); }} disabled={index === resume.resumeData.sections.length - 1} title="Move Down"><FiArrowDown /></button>
-//                                 {section.isCustom && <button onClick={(e) => { e.stopPropagation(); deleteSection(section.key); }} title="Delete Section"><FiTrash2/></button>}
-//                             </>
-//                         }
-//                     >
-//                         {section.key === 'personalDetails' && renderPersonalDetails()}
-//                         {(section.key === 'summary' || section.key === 'professionalSummary') && renderProfessionalSummary()}
-//                         {(section.key === 'experience' || section.key === 'workExperience') && renderWorkExperience()}
-//                         {section.key === 'projects' && renderProjects()}
-//                         {section.key === 'education' && renderEducation()}
-//                         {section.key === 'skills' && renderSkills()}
-//                         {section.isCustom && renderCustomSection(section)}
-//                     </Section>
-//                 ))}
-//             </div>
-//             {isAddSectionModalOpen && <AddSectionModal onAddSection={addSection} onClose={() => setIsAddSectionModalOpen(false)} />}
-//         </>
+//         <><div className={styles.panelContent}><header className={styles.header}><h2 className={styles.title}>{resume.resumeData.personalDetails?.name || 'Untitled Resume'}</h2><button onClick={() => setIsAddSectionModalOpen(true)} className={styles.actionButton}><FiPlus /> Add Section</button></header>{(resume.resumeData.sections || []).map((section, index) => (<Section key={`${section.key}-${index}`} title={section.title} sectionControls={<><button onClick={(e) => { e.stopPropagation(); moveSection(index, -1); }} disabled={index === 0} title="Move Up"><FiArrowUp /></button><button onClick={(e) => { e.stopPropagation(); moveSection(index, 1); }} disabled={index === resume.resumeData.sections.length - 1} title="Move Down"><FiArrowDown /></button>{section.isCustom && <button onClick={(e) => { e.stopPropagation(); deleteSection(section.key); }} title="Delete Section"><FiTrash2/></button>}</>}>{section.key === 'personalDetails' && renderPersonalDetails()}{(section.key === 'summary' || section.key === 'professionalSummary') && renderProfessionalSummary()}{(section.key === 'experience' || section.key === 'workExperience') && renderWorkExperience()}{section.key === 'projects' && renderProjects()}{section.key === 'education' && renderEducation()}{section.key === 'skills' && renderSkills()}{section.isCustom && renderCustomSection(section)}</Section>))}</div>{isAddSectionModalOpen && <AddSectionModal onAddSection={addSection} onClose={() => setIsAddSectionModalOpen(false)} />}</>
 //     );
 
 //     const renderAiPanel = () => {
 //         if (mode === 'ATS') {
-//             return (
-//                 <div className={`${styles.aiPanel} ${styles.panelContent}`}>
-//                     <h2>ATS Score & Analysis</h2>
-//                     {aiLoading ? <div className={styles.centeredMessage}>Analyzing...</div> : aiResult && (
-//                         <div className={styles.aiResults}>
-//                             {aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}
-//                             {aiResult.score !== undefined && (
-//                                 <div className={styles.scoreCircle} style={{'--score': `${aiResult.score * 3.6}deg`}}>
-//                                     <span>{aiResult.score}<small>/100</small></span>
-//                                 </div>
-//                             )}
-//                             {aiResult.summary && <p className={styles.summary}>{aiResult.summary}</p>}
-//                             {aiResult.suggestions && (
-//                                 <div className={styles.aiFeedbackSection}>
-//                                     <h3>Actionable Suggestions</h3>
-//                                     <ul className={styles.suggestionList}>
-//                                         {aiResult.suggestions.map((s, i) => <li key={i}><FiCheckCircle /> {s}</li>)}
-//                                     </ul>
-//                                 </div>
-//                             )}
-//                         </div>
-//                     )}
-//                 </div>
-//             )
+//             return (<div className={`${styles.aiPanel} ${styles.panelContent}`}><h2>ATS Score & Analysis</h2>{aiLoading ? <div className={styles.centeredMessage}>Analyzing...</div> : aiResult && (<div className={styles.aiResults}>{aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}{aiResult.score !== undefined && (<div className={styles.scoreCircle} style={{'--score': `${aiResult.score * 3.6}deg`}}><span>{aiResult.score}<small>/100</small></span></div>)}{aiResult.summary && <p className={styles.summary}>{aiResult.summary}</p>}{aiResult.suggestions && (<div className={styles.aiFeedbackSection}><h3>Actionable Suggestions</h3><ul className={styles.suggestionList}>{aiResult.suggestions.map((s, i) => <li key={i}><FiCheckCircle /> {s}</li>)}</ul></div>)}</div>)}</div>)
 //         }
 //         if (mode === 'PERSONALIZE') {
-//             return (
-//                  <div className={`${styles.aiPanel} ${styles.panelContent}`}>
-//                     <div className={styles.jobDescriptionContainer}>
-//                         <div className={styles.jobDescriptionHeader} onClick={() => setIsJobDescVisible(!isJobDescVisible)}>
-//                             <h3><FiFileText /> Job Description</h3>
-//                             <FiChevronDown className={`${styles.chevron} ${isJobDescVisible ? styles.open : ''}`} />
-//                         </div>
-//                         {isJobDescVisible && (
-//                             <div className={styles.jobDescriptionContent}>
-//                             <textarea
-//                                 value={jobDescription}
-//                                 onChange={(e) => setJobDescription(e.target.value)}
-//                                 placeholder="Paste the full job description here..."
-//                             />
-//                             <button onClick={handlePersonalize} disabled={aiLoading} className={styles.aiActionButton}>
-//                                 {aiLoading ? 'Personalizing...' : <><FiZap /> Personalize Resume</>}
-//                             </button>
-//                             </div>
-//                         )}
-//                     </div>
-//                     <div className={styles.aiResults}>
-//                         {aiLoading && <div className={styles.centeredMessage}>Our AI is crafting your personalized feedback...</div>}
-//                         {aiResult && !aiLoading && (
-//                             <>
-//                                 {aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}
-//                                 {aiResult.strategicFeedback && (
-//                                     <div className={styles.aiFeedbackSection}>
-//                                         <h3><FiStar/> Strategic Feedback</h3>
-//                                         <p>{aiResult.strategicFeedback}</p>
-//                                     </div>
-//                                 )}
-//                                  <pre>{JSON.stringify(aiResult, null, 2)}</pre>
-//                             </>
-//                         )}
-//                     </div>
-//                 </div>
-//             )
+//             return (<div className={`${styles.aiPanel} ${styles.panelContent}`}><div className={styles.jobDescriptionContainer}><div className={styles.jobDescriptionHeader} onClick={() => setIsJobDescVisible(!isJobDescVisible)}><h3><FiFileText /> Job Description</h3><FiChevronDown className={`${styles.chevron} ${isJobDescVisible ? styles.open : ''}`} /></div>{isJobDescVisible && (<div className={styles.jobDescriptionContent}><textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the full job description here..." /><button onClick={handlePersonalize} disabled={aiLoading} className={styles.aiActionButton}>{aiLoading ? 'Personalizing...' : <><FiZap /> Personalize Resume</>}</button></div>)}</div><div className={styles.aiResults}>{aiLoading && <div className={styles.centeredMessage}>Our AI is crafting your personalized feedback...</div>}{aiResult && !aiLoading && (<>{aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}{aiResult.strategicFeedback && (<div className={styles.aiFeedbackSection}><h3><FiStar/> Strategic Feedback</h3><p>{aiResult.strategicFeedback}</p></div>)}<pre>{JSON.stringify(aiResult, null, 2)}</pre></>)}</div></div>)
 //         }
 //         return null;
 //     }
 
 //     const renderPreviewPanel = () => (
-//         <div className={styles.previewPanel}>
-//             <div className={styles.previewHeader}>
-//                 <h3>Live Preview</h3>
-//                 <button onClick={() => updatePreview(resume)} disabled={previewLoading} className={styles.updatePreviewButton}>
-//                     <FiRefreshCw className={previewLoading ? styles.spinning : ''} />
-//                     <span>Refresh</span>
-//                 </button>
-//             </div>
-//             <div className={styles.pdfViewer}>
-//                 {error && <div className={styles.centeredMessage}>{error}</div>}
-//                 {!error && pdfUrl && <iframe src={pdfUrl} title="Resume Preview" className={styles.pdfPreview} />}
-//                 {!error && !pdfUrl && <div className={styles.centeredMessage}>{previewLoading ? 'Generating...' : 'No Preview Available'}</div>}
-//             </div>
-//         </div>
+//         <div className={styles.previewPanel}><div className={styles.previewHeader}><h3>Live Preview</h3><button onClick={() => updatePreview(resume)} disabled={previewLoading} className={styles.updatePreviewButton}><FiRefreshCw className={previewLoading ? styles.spinning : ''} /><span>Refresh</span></button></div><div className={styles.pdfViewer}>{error && <div className={styles.centeredMessage}>{error}</div>}{!error && pdfUrl && <iframe src={pdfUrl} title="Resume Preview" className={styles.pdfPreview} />}{!error && !pdfUrl && <div className={styles.centeredMessage}>{previewLoading ? 'Generating...' : 'No Preview Available'}</div>}</div></div>
 //     );
 
 //     if (loading || !resume) return <div className={styles.centeredMessage}>Loading Editor...</div>;
@@ -623,13 +366,36 @@
 //         <div className={styles.editorLayout}>
 //             <header className={styles.controlsHeader}>
 //                 <div className={styles.controls}>
-//                     <button onClick={() => setMode('EDIT')} className={mode === 'EDIT' ? styles.active : ''}>Edit</button>
-//                     <button onClick={handleGetAtsScore} className={mode === 'ATS' ? styles.active : ''}>ATS Score</button>
-//                     <button onClick={() => { setMode('PERSONALIZE'); setAiResult(null); }} className={mode === 'PERSONALIZE' ? styles.active : ''}>Personalize</button>
-//                     <button onClick={handleSaveAndClose} disabled={saving} className={styles.saveButton}>
-//                         <FiSave /> {saving ? 'Saving...' : 'Save & Close'}
+//                     <button 
+//                         onClick={() => setMode('EDIT')} 
+//                         className={mode === 'EDIT' ? styles.active : ''}
+//                         data-tooltip="Editor"
+//                     >
+//                         Edit
+//                     </button>
+//                     <button 
+//                         onClick={handleGetAtsScore} 
+//                         className={mode === 'ATS' ? styles.active : ''}
+//                         data-tooltip="ATS Score & Analysis"
+//                     >
+//                         ATS Score
+//                     </button>
+//                     <button 
+//                         onClick={() => { setMode('PERSONALIZE'); setAiResult(null); }} 
+//                         className={mode === 'PERSONALIZE' ? styles.active : ''}
+//                         data-tooltip="Personalize with AI for a Job"
+//                     >
+//                         Personalize
 //                     </button>
 //                 </div>
+//                 <button 
+//                     onClick={handleSaveAndClose} 
+//                     disabled={saving} 
+//                     className={styles.saveButton}
+//                     data-tooltip="Save and exit"
+//                 >
+//                     <FiSave /> {saving ? 'Saving...' : 'Save & Close'}
+//                 </button>
 //             </header>
 
 //             <main className={styles.leftPanelContainer}>
@@ -645,15 +411,13 @@
 
 // export default ResumeEditor;
 
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import styles from './resumeeditor.module.css';
 import { FiSave, FiPlus, FiTrash2, FiEdit, FiArrowUp, FiArrowDown, FiRefreshCw, FiChevronDown, FiStar, FiZap, FiFileText, FiCheckCircle, FiBold } from 'react-icons/fi';
 
-// New component for adding a custom section
+// Modal component for adding a custom section
 const AddSectionModal = ({ onAddSection, onClose }) => {
     const [sectionName, setSectionName] = useState('');
     const [sectionType, setSectionType] = useState('list-with-bullets');
@@ -691,7 +455,7 @@ const AddSectionModal = ({ onAddSection, onClose }) => {
     );
 };
 
-// A re-usable input component with bold and AI enhancement buttons
+// Re-usable input component with AI and bolding features
 const AiInputField = ({ path, value, placeholder, onChange, onImprove, improvingPath, type = 'input' }) => {
     const isImproving = improvingPath === path;
     const InputComponent = type === 'textarea' ? 'textarea' : 'input';
@@ -714,19 +478,10 @@ const AiInputField = ({ path, value, placeholder, onChange, onImprove, improving
                 className={styles.inputField}
             />
             <div className={styles.inputControls}>
-                <button
-                    onClick={handleBoldClick}
-                    className={styles.boldButton}
-                    title="Bold selected text"
-                >
+                <button onClick={handleBoldClick} className={styles.boldButton} title="Bold selected text">
                     <FiBold />
                 </button>
-                <button
-                    onClick={() => onImprove(path, value)}
-                    className={styles.aiButton}
-                    title="Improve Writing with AI"
-                    disabled={isImproving}
-                >
+                <button onClick={() => onImprove(path, value)} className={styles.aiButton} title="Improve Writing with AI" disabled={isImproving}>
                     {isImproving ? <FiRefreshCw className={styles.spinning} /> : <FiEdit />}
                 </button>
             </div>
@@ -769,7 +524,6 @@ const ResumeEditor = () => {
     const [isJobDescVisible, setIsJobDescVisible] = useState(true);
     const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
 
-
     const updatePreview = useCallback(async (currentResume) => {
         if (!id || !currentResume) return;
         setPreviewLoading(true);
@@ -793,9 +547,15 @@ const ResumeEditor = () => {
         }
     }, [id]);
 
+    // --- START: FLICKER FIX ---
+    // This hook now ONLY fetches the initial resume data.
+    // The dependency array is correct, which prevents the re-render loop.
     useEffect(() => {
         const fetchResumeData = async () => {
-            if (!id) { navigate('/dashboard'); return; }
+            if (!id) {
+                navigate('/dashboard');
+                return;
+            }
             setLoading(true);
             try {
                 const { data } = await api.get(`/api/resume/${id}`);
@@ -809,9 +569,22 @@ const ResumeEditor = () => {
         };
         fetchResumeData();
 
-        return () => { if (pdfUrl) { window.URL.revokeObjectURL(pdfUrl); } };
+        // The cleanup function for the final PDF URL is now handled in a separate, dedicated effect.
     }, [id, navigate]);
 
+    // This dedicated effect handles the cleanup of the generated PDF URL to prevent memory leaks.
+    useEffect(() => {
+        // This returns a cleanup function that will be called when the component is unmounted.
+        return () => {
+            if (pdfUrl) {
+                window.URL.revokeObjectURL(pdfUrl);
+            }
+        };
+    }, [pdfUrl]);
+    // --- END: FLICKER FIX ---
+
+
+    // This hook debounces the preview update to avoid excessive API calls.
     useEffect(() => {
         if (resume) {
             const handler = setTimeout(() => {
@@ -910,7 +683,7 @@ const ResumeEditor = () => {
         const currentItems = resume.resumeData[sectionKey] || [];
         handleDataChange(sectionKey, [...currentItems, defaultItem]);
     };
-
+    
     const removeArrayItem = (sectionKey, index) => {
         if (!resume) return;
         const currentData = resume.resumeData[sectionKey] ?? resume.resumeData[sectionKey === 'experience' ? 'workExperience' : 'professionalSummary'];
@@ -1012,34 +785,11 @@ const ResumeEditor = () => {
         <div className={styles.editorLayout}>
             <header className={styles.controlsHeader}>
                 <div className={styles.controls}>
-                    <button 
-                        onClick={() => setMode('EDIT')} 
-                        className={mode === 'EDIT' ? styles.active : ''}
-                        data-tooltip="Editor"
-                    >
-                        Edit
-                    </button>
-                    <button 
-                        onClick={handleGetAtsScore} 
-                        className={mode === 'ATS' ? styles.active : ''}
-                        data-tooltip="ATS Score & Analysis"
-                    >
-                        ATS Score
-                    </button>
-                    <button 
-                        onClick={() => { setMode('PERSONALIZE'); setAiResult(null); }} 
-                        className={mode === 'PERSONALIZE' ? styles.active : ''}
-                        data-tooltip="Personalize with AI for a Job"
-                    >
-                        Personalize
-                    </button>
+                    <button onClick={() => setMode('EDIT')} className={mode === 'EDIT' ? styles.active : ''} data-tooltip="Editor">Edit</button>
+                    <button onClick={handleGetAtsScore} className={mode === 'ATS' ? styles.active : ''} data-tooltip="ATS Score & Analysis">ATS Score</button>
+                    <button onClick={() => { setMode('PERSONALIZE'); setAiResult(null); }} className={mode === 'PERSONALIZE' ? styles.active : ''} data-tooltip="Personalize with AI for a Job">Personalize</button>
                 </div>
-                <button 
-                    onClick={handleSaveAndClose} 
-                    disabled={saving} 
-                    className={styles.saveButton}
-                    data-tooltip="Save and exit"
-                >
+                <button onClick={handleSaveAndClose} disabled={saving} className={styles.saveButton} data-tooltip="Save and exit">
                     <FiSave /> {saving ? 'Saving...' : 'Save & Close'}
                 </button>
             </header>
