@@ -287,7 +287,7 @@ const personalizeForJob = async (req, res) => {
             5.  **"education"**: An object containing "feedback" (a string of advice, like relevant coursework to add) and "rewrittenItems" (an array for any suggested changes to their education entries).
             6.  **"skills"**: An object with "feedback" (a string of advice for this section), "missingSkills" (an array of crucial keywords to add), and "suggestedSkillsList" (a complete, rewritten comma-separated string of skills).
             
-            ---
+            --
             **User's Resume:**
             ${resumeText}
             ---
