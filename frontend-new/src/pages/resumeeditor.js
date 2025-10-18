@@ -1,13 +1,12 @@
 
 
-
 // import React, { useState, useEffect, useCallback } from 'react';
 // import { useParams, useNavigate } from 'react-router-dom';
 // import api from '../api/api';
 // import styles from './resumeeditor.module.css';
 // import { FiSave, FiPlus, FiTrash2, FiEdit, FiArrowUp, FiArrowDown, FiRefreshCw, FiChevronDown, FiStar, FiZap, FiFileText, FiCheckCircle, FiBold } from 'react-icons/fi';
 
-// // New component for adding a custom section
+// // Modal component for adding a custom section
 // const AddSectionModal = ({ onAddSection, onClose }) => {
 //     const [sectionName, setSectionName] = useState('');
 //     const [sectionType, setSectionType] = useState('list-with-bullets');
@@ -45,7 +44,7 @@
 //     );
 // };
 
-// // A re-usable input component with bold and AI enhancement buttons
+// // Re-usable input component with AI and bolding features
 // const AiInputField = ({ path, value, placeholder, onChange, onImprove, improvingPath, type = 'input' }) => {
 //     const isImproving = improvingPath === path;
 //     const InputComponent = type === 'textarea' ? 'textarea' : 'input';
@@ -68,19 +67,10 @@
 //                 className={styles.inputField}
 //             />
 //             <div className={styles.inputControls}>
-//                 <button
-//                     onClick={handleBoldClick}
-//                     className={styles.boldButton}
-//                     title="Bold selected text"
-//                 >
+//                 <button onClick={handleBoldClick} className={styles.boldButton} title="Bold selected text">
 //                     <FiBold />
 //                 </button>
-//                 <button
-//                     onClick={() => onImprove(path, value)}
-//                     className={styles.aiButton}
-//                     title="Improve Writing with AI"
-//                     disabled={isImproving}
-//                 >
+//                 <button onClick={() => onImprove(path, value)} className={styles.aiButton} title="Improve Writing with AI" disabled={isImproving}>
 //                     {isImproving ? <FiRefreshCw className={styles.spinning} /> : <FiEdit />}
 //                 </button>
 //             </div>
@@ -123,15 +113,14 @@
 //     const [isJobDescVisible, setIsJobDescVisible] = useState(true);
 //     const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
 
-
-//     const updatePreview = useCallback(async (currentResume) => {
-//         if (!id || !currentResume) return;
+//     const updatePreview = useCallback(async () => {
+//         if (!id || !resume) return;
 //         setPreviewLoading(true);
 //         setError('');
 //         try {
 //             const response = await api.post(`/api/resume/preview/${id}`, {
-//                 resumeData: currentResume.resumeData,
-//                 templateName: currentResume.templateName
+//                 resumeData: resume.resumeData,
+//                 templateName: resume.templateName
 //             }, { responseType: 'blob' });
 
 //             const newPdfUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
@@ -145,11 +134,14 @@
 //         } finally {
 //             setPreviewLoading(false);
 //         }
-//     }, [id]);
+//     }, [id, resume]);
 
 //     useEffect(() => {
 //         const fetchResumeData = async () => {
-//             if (!id) { navigate('/dashboard'); return; }
+//             if (!id) {
+//                 navigate('/dashboard');
+//                 return;
+//             }
 //             setLoading(true);
 //             try {
 //                 const { data } = await api.get(`/api/resume/${id}`);
@@ -163,17 +155,12 @@
 //         };
 //         fetchResumeData();
 
-//         return () => { if (pdfUrl) { window.URL.revokeObjectURL(pdfUrl); } };
+//         return () => {
+//             if (pdfUrl) {
+//                 window.URL.revokeObjectURL(pdfUrl);
+//             }
+//         };
 //     }, [id, navigate]);
-
-//     useEffect(() => {
-//         if (resume) {
-//             const handler = setTimeout(() => {
-//                 updatePreview(resume);
-//             }, 500);
-//             return () => clearTimeout(handler);
-//         }
-//     }, [resume, updatePreview]);
 
 //     const handleDataChange = (path, value) => {
 //         setResume(prev => {
@@ -197,7 +184,10 @@
 //             for (let i = 0; i < keys.length - 1; i++) {
 //                 const key = keys[i];
 //                 const nextKey = keys[i + 1];
-//                 current = current[key] = current[key] || (isNaN(parseInt(nextKey)) ? {} : []);
+//                 if (!current[key]) {
+//                   current[key] = isNaN(parseInt(nextKey)) ? {} : [];
+//                 }
+//                 current = current[key];
 //             }
 //             current[keys[keys.length - 1]] = value;
 //             return { ...prev, resumeData: newResumeData };
@@ -264,7 +254,7 @@
 //         const currentItems = resume.resumeData[sectionKey] || [];
 //         handleDataChange(sectionKey, [...currentItems, defaultItem]);
 //     };
-
+    
 //     const removeArrayItem = (sectionKey, index) => {
 //         if (!resume) return;
 //         const currentData = resume.resumeData[sectionKey] ?? resume.resumeData[sectionKey === 'experience' ? 'workExperience' : 'professionalSummary'];
@@ -277,7 +267,7 @@
         
 //         const newResumeData = { ...resume.resumeData };
 //         if (type === 'list-with-bullets') {
-//             newResumeData[newSectionKey] = [{ title: '', subtitle: '', bulletPoints: [''] }];
+//             newResumeData[newSectionKey] = [{ title: '', bulletPoints: [''] }];
 //         } else if (type === 'single-text-area') {
 //             newResumeData[newSectionKey] = '';
 //         } else if (type === 'single-input-and-description') {
@@ -336,8 +326,8 @@
 
 //     const renderCustomSection = (section) => (
 //         <div className={styles.sectionFields}>
-//             {section.type === 'list-with-bullets' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`${section.key}.${index}.subtitle`} value={item.subtitle} placeholder={`${section.title} Subtitle`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><div className={styles.bulletPoints}>{(item.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`${section.key}.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="Bullet Point" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`${section.key}.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`${section.key}.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) : 
-//             section.type === 'single-text-area' ? (<AiInputField path={section.key} value={resume.resumeData[section.key]} placeholder={`Enter details for ${section.title}`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />) : 
+//             {section.type === 'list-with-bullets' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><div className={styles.bulletPoints}>{(item.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`${section.key}.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="Bullet Point" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`${section.key}.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`${section.key}.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) :
+//             section.type === 'single-text-area' ? (<AiInputField path={section.key} value={resume.resumeData[section.key]} placeholder={`Enter details for ${section.title}`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />) :
 //             section.type === 'single-input-and-description' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`${section.key}.${index}.description`} value={item.description} placeholder="Description" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /></div>))}<button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) : null}
 //         </div>
 //     );
@@ -366,34 +356,11 @@
 //         <div className={styles.editorLayout}>
 //             <header className={styles.controlsHeader}>
 //                 <div className={styles.controls}>
-//                     <button 
-//                         onClick={() => setMode('EDIT')} 
-//                         className={mode === 'EDIT' ? styles.active : ''}
-//                         data-tooltip="Editor"
-//                     >
-//                         Edit
-//                     </button>
-//                     <button 
-//                         onClick={handleGetAtsScore} 
-//                         className={mode === 'ATS' ? styles.active : ''}
-//                         data-tooltip="ATS Score & Analysis"
-//                     >
-//                         ATS Score
-//                     </button>
-//                     <button 
-//                         onClick={() => { setMode('PERSONALIZE'); setAiResult(null); }} 
-//                         className={mode === 'PERSONALIZE' ? styles.active : ''}
-//                         data-tooltip="Personalize with AI for a Job"
-//                     >
-//                         Personalize
-//                     </button>
+//                     <button onClick={() => setMode('EDIT')} className={mode === 'EDIT' ? styles.active : ''} data-tooltip="Editor">Edit</button>
+//                     <button onClick={handleGetAtsScore} className={mode === 'ATS' ? styles.active : ''} data-tooltip="ATS Score & Analysis">ATS Score</button>
+//                     <button onClick={() => { setMode('PERSONALIZE'); setAiResult(null); }} className={mode === 'PERSONALIZE' ? styles.active : ''} data-tooltip="Personalize with AI for a Job">Personalize</button>
 //                 </div>
-//                 <button 
-//                     onClick={handleSaveAndClose} 
-//                     disabled={saving} 
-//                     className={styles.saveButton}
-//                     data-tooltip="Save and exit"
-//                 >
+//                 <button onClick={handleSaveAndClose} disabled={saving} className={styles.saveButton} data-tooltip="Save and exit">
 //                     <FiSave /> {saving ? 'Saving...' : 'Save & Close'}
 //                 </button>
 //             </header>
@@ -410,6 +377,12 @@
 // };
 
 // export default ResumeEditor;
+
+
+
+
+
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -524,14 +497,14 @@ const ResumeEditor = () => {
     const [isJobDescVisible, setIsJobDescVisible] = useState(true);
     const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
 
-    const updatePreview = useCallback(async (currentResume) => {
-        if (!id || !currentResume) return;
+    const updatePreview = useCallback(async () => {
+        if (!id || !resume) return;
         setPreviewLoading(true);
         setError('');
         try {
             const response = await api.post(`/api/resume/preview/${id}`, {
-                resumeData: currentResume.resumeData,
-                templateName: currentResume.templateName
+                resumeData: resume.resumeData,
+                templateName: resume.templateName
             }, { responseType: 'blob' });
 
             const newPdfUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
@@ -545,11 +518,8 @@ const ResumeEditor = () => {
         } finally {
             setPreviewLoading(false);
         }
-    }, [id]);
+    }, [id, resume]);
 
-    // --- START: FLICKER FIX ---
-    // This hook now ONLY fetches the initial resume data.
-    // The dependency array is correct, which prevents the re-render loop.
     useEffect(() => {
         const fetchResumeData = async () => {
             if (!id) {
@@ -568,31 +538,21 @@ const ResumeEditor = () => {
             }
         };
         fetchResumeData();
-
-        // The cleanup function for the final PDF URL is now handled in a separate, dedicated effect.
     }, [id, navigate]);
 
-    // This dedicated effect handles the cleanup of the generated PDF URL to prevent memory leaks.
     useEffect(() => {
-        // This returns a cleanup function that will be called when the component is unmounted.
         return () => {
             if (pdfUrl) {
                 window.URL.revokeObjectURL(pdfUrl);
             }
         };
     }, [pdfUrl]);
-    // --- END: FLICKER FIX ---
 
-
-    // This hook debounces the preview update to avoid excessive API calls.
-    useEffect(() => {
-        if (resume) {
-            const handler = setTimeout(() => {
-                updatePreview(resume);
-            }, 500);
-            return () => clearTimeout(handler);
-        }
-    }, [resume, updatePreview]);
+    // Helper to get a nested property from an object using a string path
+    const getNestedValue = (obj, path) => {
+        if (!path) return obj;
+        return path.split('.').reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
+    };
 
     const handleDataChange = (path, value) => {
         setResume(prev => {
@@ -616,7 +576,10 @@ const ResumeEditor = () => {
             for (let i = 0; i < keys.length - 1; i++) {
                 const key = keys[i];
                 const nextKey = keys[i + 1];
-                current = current[key] = current[key] || (isNaN(parseInt(nextKey)) ? {} : []);
+                if (!current[key]) {
+                  current[key] = isNaN(parseInt(nextKey)) ? {} : [];
+                }
+                current = current[key];
             }
             current[keys[keys.length - 1]] = value;
             return { ...prev, resumeData: newResumeData };
@@ -678,16 +641,17 @@ const ResumeEditor = () => {
         }
     };
     
-    const addArrayItem = (sectionKey, defaultItem = {}) => {
+    // --- THIS IS THE FIX ---
+    const addArrayItem = (path, defaultItem = {}) => {
         if (!resume) return;
-        const currentItems = resume.resumeData[sectionKey] || [];
-        handleDataChange(sectionKey, [...currentItems, defaultItem]);
+        const currentItems = getNestedValue(resume.resumeData, path) || [];
+        handleDataChange(path, [...currentItems, defaultItem]);
     };
-    
-    const removeArrayItem = (sectionKey, index) => {
+
+    const removeArrayItem = (path, index) => {
         if (!resume) return;
-        const currentData = resume.resumeData[sectionKey] ?? resume.resumeData[sectionKey === 'experience' ? 'workExperience' : 'professionalSummary'];
-        handleDataChange(sectionKey, currentData.filter((_, i) => i !== index));
+        const currentItems = getNestedValue(resume.resumeData, path) || [];
+        handleDataChange(path, currentItems.filter((_, i) => i !== index));
     };
     
     const addSection = (name, type) => {
@@ -696,7 +660,7 @@ const ResumeEditor = () => {
         
         const newResumeData = { ...resume.resumeData };
         if (type === 'list-with-bullets') {
-            newResumeData[newSectionKey] = [{ title: '', subtitle: '', bulletPoints: [''] }];
+            newResumeData[newSectionKey] = [{ title: '', bulletPoints: [''] }];
         } else if (type === 'single-text-area') {
             newResumeData[newSectionKey] = '';
         } else if (type === 'single-input-and-description') {
@@ -730,7 +694,6 @@ const ResumeEditor = () => {
     const renderPersonalDetails = () => (
         <div className={styles.sectionFields}>
             <div className={styles.inputGroup}><label>Your Name</label><AiInputField path="personalDetails.name" value={resume.resumeData.personalDetails?.name} placeholder="Pavan Sai Kumar" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
-            <div className={styles.inputGroup}><label>Professional Title</label><AiInputField path="personalDetails.professionalTitle" value={resume.resumeData.personalDetails?.professionalTitle} placeholder="Professional Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
             <div className={styles.inputGroup}><label>Email Address</label><AiInputField path="personalDetails.email" value={resume.resumeData.personalDetails?.email} placeholder="your.email@example.com" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="email" /></div>
             <div className={styles.inputGroup}><label>Phone Number</label><AiInputField path="personalDetails.phone" value={resume.resumeData.personalDetails?.phone} placeholder="123-456-7890" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="tel" /></div>
             <div className={styles.inputGroup}><label>LinkedIn</label><AiInputField path="personalDetails.linkedin" value={resume.resumeData.personalDetails?.linkedin} placeholder="linkedin.com/in/yourprofile" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>
@@ -747,7 +710,7 @@ const ResumeEditor = () => {
         return (<div className={styles.sectionFields}>{(experienceItems || []).map((exp, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{exp.jobTitle || `Work Experience ${index + 1}`}</h4><button onClick={() => removeArrayItem('experience', index)}><FiTrash2 /></button></div><AiInputField path={`experience.${index}.jobTitle`} value={exp.jobTitle} placeholder="Job Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`experience.${index}.company`} value={exp.company} placeholder="Company Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`experience.${index}.location`} value={exp.location} placeholder="City, State" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`experience.${index}.duration`} value={exp.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><label>Description</label><AiInputField path={`experience.${index}.description`} value={exp.description} placeholder="A short description of your responsibilities..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /></div>))}<button onClick={() => addArrayItem('experience', {})} className={styles.addButton}><FiPlus /> Add Experience</button></div>);
     }
 
-    const renderProjects = () => (<div className={styles.sectionFields}>{(resume.resumeData.projects || []).map((project, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{project.projectTitle || `Project ${index + 1}`}</h4><button onClick={() => removeArrayItem('projects', index)}><FiTrash2 /></button></div><AiInputField path={`projects.${index}.projectTitle`} value={project.projectTitle} placeholder="Project Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`projects.${index}.description`} value={project.description} placeholder="A brief overview of the project..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /><div className={styles.bulletPoints}>{(project.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`projects.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="A specific feature you implemented..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`projects.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`projects.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem('projects', {})} className={styles.addButton}><FiPlus /> Add Project</button></div>);
+    const renderProjects = () => (<div className={styles.sectionFields}>{(resume.resumeData.projects || []).map((project, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{project.projectTitle || `Project ${index + 1}`}</h4><button onClick={() => removeArrayItem('projects', index)}><FiTrash2 /></button></div><AiInputField path={`projects.${index}.projectTitle`} value={project.projectTitle} placeholder="Project Title" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`projects.${index}.description`} value={project.description} placeholder="A brief overview of the project..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /><div className={styles.bulletPoints}>{(project.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`projects.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="A specific feature you implemented..." onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`projects.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`projects.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem('projects', { bulletPoints: [''] })} className={styles.addButton}><FiPlus /> Add Project</button></div>);
 
     const renderEducation = () => (<div className={styles.sectionFields}>{(resume.resumeData.education || []).map((edu, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{edu.universityName || `Education ${index + 1}`}</h4><button onClick={() => removeArrayItem('education', index)}><FiTrash2 /></button></div><div className={styles.inputRow}><AiInputField path={`education.${index}.universityName`} value={edu.universityName} placeholder="University Name" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`education.${index}.degree`} value={edu.degree} placeholder="Your Degree" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div><AiInputField path={`education.${index}.duration`} value={edu.duration} placeholder="Month Year - Month Year" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /></div>))}<button onClick={() => addArrayItem('education', {})} className={styles.addButton}><FiPlus /> Add Education</button></div>);
 
@@ -755,8 +718,8 @@ const ResumeEditor = () => {
 
     const renderCustomSection = (section) => (
         <div className={styles.sectionFields}>
-            {section.type === 'list-with-bullets' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`${section.key}.${index}.subtitle`} value={item.subtitle} placeholder={`${section.title} Subtitle`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><div className={styles.bulletPoints}>{(item.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`${section.key}.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="Bullet Point" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`${section.key}.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`${section.key}.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) : 
-            section.type === 'single-text-area' ? (<AiInputField path={section.key} value={resume.resumeData[section.key]} placeholder={`Enter details for ${section.title}`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />) : 
+            {section.type === 'list-with-bullets' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><div className={styles.bulletPoints}>{(item.bulletPoints || []).map((point, bulletIndex) => (<div key={bulletIndex} className={styles.bulletItem}><AiInputField path={`${section.key}.${index}.bulletPoints.${bulletIndex}`} value={point} placeholder="Bullet Point" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><button onClick={() => removeArrayItem(`${section.key}.${index}.bulletPoints`, bulletIndex)}><FiTrash2 /></button></div>))}<button onClick={() => addArrayItem(`${section.key}.${index}.bulletPoints`, '')} className={styles.addButton}><FiPlus /> Add Bullet Point</button></div></div>))}<button onClick={() => addArrayItem(section.key, { bulletPoints: [''] })} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) :
+            section.type === 'single-text-area' ? (<AiInputField path={section.key} value={resume.resumeData[section.key]} placeholder={`Enter details for ${section.title}`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" />) :
             section.type === 'single-input-and-description' ? (<>{(resume.resumeData[section.key] || []).map((item, index) => (<div key={index} className={styles.subsection}><div className={styles.subsectionHeader}><h4>{item.title || `${section.title} ${index + 1}`}</h4><button onClick={() => removeArrayItem(section.key, index)}><FiTrash2 /></button></div><AiInputField path={`${section.key}.${index}.title`} value={item.title} placeholder={`${section.title} Title`} onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} /><AiInputField path={`${section.key}.${index}.description`} value={item.description} placeholder="Description" onChange={handleDataChange} onImprove={handleImproveWriting} improvingPath={improvingText} type="textarea" /></div>))}<button onClick={() => addArrayItem(section.key, {})} className={styles.addButton}><FiPlus /> Add {section.title}</button></>) : null}
         </div>
     );
@@ -765,18 +728,194 @@ const ResumeEditor = () => {
         <><div className={styles.panelContent}><header className={styles.header}><h2 className={styles.title}>{resume.resumeData.personalDetails?.name || 'Untitled Resume'}</h2><button onClick={() => setIsAddSectionModalOpen(true)} className={styles.actionButton}><FiPlus /> Add Section</button></header>{(resume.resumeData.sections || []).map((section, index) => (<Section key={`${section.key}-${index}`} title={section.title} sectionControls={<><button onClick={(e) => { e.stopPropagation(); moveSection(index, -1); }} disabled={index === 0} title="Move Up"><FiArrowUp /></button><button onClick={(e) => { e.stopPropagation(); moveSection(index, 1); }} disabled={index === resume.resumeData.sections.length - 1} title="Move Down"><FiArrowDown /></button>{section.isCustom && <button onClick={(e) => { e.stopPropagation(); deleteSection(section.key); }} title="Delete Section"><FiTrash2/></button>}</>}>{section.key === 'personalDetails' && renderPersonalDetails()}{(section.key === 'summary' || section.key === 'professionalSummary') && renderProfessionalSummary()}{(section.key === 'experience' || section.key === 'workExperience') && renderWorkExperience()}{section.key === 'projects' && renderProjects()}{section.key === 'education' && renderEducation()}{section.key === 'skills' && renderSkills()}{section.isCustom && renderCustomSection(section)}</Section>))}</div>{isAddSectionModalOpen && <AddSectionModal onAddSection={addSection} onClose={() => setIsAddSectionModalOpen(false)} />}</>
     );
 
+    // *** UPDATED renderAiPanel Function ***
     const renderAiPanel = () => {
         if (mode === 'ATS') {
-            return (<div className={`${styles.aiPanel} ${styles.panelContent}`}><h2>ATS Score & Analysis</h2>{aiLoading ? <div className={styles.centeredMessage}>Analyzing...</div> : aiResult && (<div className={styles.aiResults}>{aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}{aiResult.score !== undefined && (<div className={styles.scoreCircle} style={{'--score': `${aiResult.score * 3.6}deg`}}><span>{aiResult.score}<small>/100</small></span></div>)}{aiResult.summary && <p className={styles.summary}>{aiResult.summary}</p>}{aiResult.suggestions && (<div className={styles.aiFeedbackSection}><h3>Actionable Suggestions</h3><ul className={styles.suggestionList}>{aiResult.suggestions.map((s, i) => <li key={i}><FiCheckCircle /> {s}</li>)}</ul></div>)}</div>)}</div>)
+            return (
+                <div className={`${styles.aiPanel} ${styles.panelContent}`}>
+                    <h2>ATS Score & Analysis</h2>
+                    {aiLoading ? (
+                        <div className={styles.centeredMessage}>Analyzing...</div>
+                    ) : aiResult ? (
+                        <div className={styles.aiResults}>
+                            {aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}
+                            {aiResult.score !== undefined && (
+                                <div className={styles.scoreCircle} style={{'--score': `${aiResult.score * 3.6}deg`}}>
+                                    <span>{aiResult.score}<small>/100</small></span>
+                                </div>
+                            )}
+                            {aiResult.summary && <p className={styles.summary}>{aiResult.summary}</p>}
+                            {aiResult.suggestions && aiResult.suggestions.length > 0 && (
+                                <div className={styles.aiFeedbackSection}>
+                                    <h3>Actionable Suggestions</h3>
+                                    <ul className={styles.suggestionList}>
+                                        {aiResult.suggestions.map((s, i) => <li key={i}><FiCheckCircle /> {s}</li>)}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                         <div className={styles.centeredMessage}>Click "ATS Score" to analyze.</div>
+                    )}
+                </div>
+            );
         }
+
         if (mode === 'PERSONALIZE') {
-            return (<div className={`${styles.aiPanel} ${styles.panelContent}`}><div className={styles.jobDescriptionContainer}><div className={styles.jobDescriptionHeader} onClick={() => setIsJobDescVisible(!isJobDescVisible)}><h3><FiFileText /> Job Description</h3><FiChevronDown className={`${styles.chevron} ${isJobDescVisible ? styles.open : ''}`} /></div>{isJobDescVisible && (<div className={styles.jobDescriptionContent}><textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the full job description here..." /><button onClick={handlePersonalize} disabled={aiLoading} className={styles.aiActionButton}>{aiLoading ? 'Personalizing...' : <><FiZap /> Personalize Resume</>}</button></div>)}</div><div className={styles.aiResults}>{aiLoading && <div className={styles.centeredMessage}>Our AI is crafting your personalized feedback...</div>}{aiResult && !aiLoading && (<>{aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}{aiResult.strategicFeedback && (<div className={styles.aiFeedbackSection}><h3><FiStar/> Strategic Feedback</h3><p>{aiResult.strategicFeedback}</p></div>)}<pre>{JSON.stringify(aiResult, null, 2)}</pre></>)}</div></div>)
+            return (
+                <div className={`${styles.aiPanel} ${styles.panelContent}`}>
+                    {/* Job Description Section */}
+                    <div className={styles.jobDescriptionContainer}>
+                        <div className={styles.jobDescriptionHeader} onClick={() => setIsJobDescVisible(!isJobDescVisible)}>
+                            <h3><FiFileText /> Job Description</h3>
+                            <FiChevronDown className={`${styles.chevron} ${isJobDescVisible ? styles.open : ''}`} />
+                        </div>
+                        {isJobDescVisible && (
+                            <div className={styles.jobDescriptionContent}>
+                                <textarea
+                                    value={jobDescription}
+                                    onChange={(e) => setJobDescription(e.target.value)}
+                                    placeholder="Paste the full job description here..."
+                                />
+                                <button onClick={handlePersonalize} disabled={aiLoading || !jobDescription.trim()} className={styles.aiActionButton}>
+                                    {aiLoading ? 'Personalizing...' : <><FiZap /> Personalize Resume</>}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* AI Results Display Area */}
+                    <div className={styles.aiResults}>
+                        {aiLoading && <div className={styles.centeredMessage}>Our AI is crafting your personalized feedback...</div>}
+
+                        {/* --- START: Corrected Rendering Logic --- */}
+                        {aiResult && !aiLoading && (
+                            <>
+                                {aiResult.error && <p className={styles.errorText}>{aiResult.error}</p>}
+
+                                {aiResult.strategicFeedback && (
+                                    <div className={styles.aiFeedbackSection}>
+                                        <h3><FiStar /> Strategic Feedback</h3>
+                                        <p>{aiResult.strategicFeedback}</p>
+                                    </div>
+                                )}
+
+                                {aiResult.summary && (
+                                    <div className={styles.aiFeedbackSection}>
+                                        <h3>Summary</h3>
+                                        <p><strong>Feedback:</strong> {aiResult.summary.feedback}</p>
+                                        <p><strong>Rewritten:</strong> {aiResult.summary.rewrittenText}</p>
+                                    </div>
+                                )}
+
+                                {aiResult.experience && (
+                                    <div className={styles.aiFeedbackSection}>
+                                        <h3>Experience</h3>
+                                        <p><strong>Feedback:</strong> {aiResult.experience.feedback}</p>
+                                        {aiResult.experience.rewrittenItems && aiResult.experience.rewrittenItems.length > 0 && (
+                                            <>
+                                                <h4>Suggestions:</h4>
+                                                <ul>
+                                                    {aiResult.experience.rewrittenItems.map((item, index) => (
+                                                        <li key={`exp-${index}`}>
+                                                            <strong>Original:</strong> {item.original || 'N/A'}<br />
+                                                            <strong>Suggestion:</strong> {item.suggestion}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
+                                {aiResult.projects && (
+                                    <div className={styles.aiFeedbackSection}>
+                                        <h3>Projects</h3>
+                                        <p><strong>Feedback:</strong> {aiResult.projects.feedback}</p>
+                                        {aiResult.projects.rewrittenItems && aiResult.projects.rewrittenItems.length > 0 && (
+                                             <>
+                                                <h4>Rewrite Suggestions:</h4>
+                                                <ul>
+                                                    {aiResult.projects.rewrittenItems.map((item, index) => (
+                                                        <li key={`proj-rewrite-${index}`}>
+                                                            <strong>Original:</strong> {item.original || 'N/A'}<br />
+                                                            <strong>Suggestion:</strong> {item.suggestion}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                             </>
+                                        )}
+                                        {aiResult.projects.newProjectIdeas && aiResult.projects.newProjectIdeas.length > 0 && (
+                                            <>
+                                                <h4>New Project Ideas:</h4>
+                                                <ul>
+                                                    {aiResult.projects.newProjectIdeas.map((idea, index) => (
+                                                        <li key={`proj-idea-${index}`}>{idea}</li>
+                                                    ))}
+                                                </ul>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
+                                {aiResult.education && (
+                                     <div className={styles.aiFeedbackSection}>
+                                        <h3>Education</h3>
+                                        <p><strong>Feedback:</strong> {aiResult.education.feedback}</p>
+                                        {aiResult.education.rewrittenItems && aiResult.education.rewrittenItems.length > 0 && (
+                                             <>
+                                                <h4>Suggestions:</h4>
+                                                <ul>
+                                                    {aiResult.education.rewrittenItems.map((item, index) => (
+                                                        <li key={`edu-${index}`}>
+                                                             <strong>Original:</strong> {item.original || 'N/A'}<br />
+                                                             <strong>Suggestion:</strong> {item.suggestion}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
+                                {aiResult.skills && (
+                                    <div className={styles.aiFeedbackSection}>
+                                        <h3>Skills</h3>
+                                        <p><strong>Feedback:</strong> {aiResult.skills.feedback}</p>
+                                        {aiResult.skills.missingSkills && aiResult.skills.missingSkills.length > 0 && (
+                                            <>
+                                                <h4>Missing Skills to Add:</h4>
+                                                <ul>
+                                                    {aiResult.skills.missingSkills.map((skill, index) => (
+                                                        <li key={`skill-missing-${index}`}>{skill}</li>
+                                                    ))}
+                                                </ul>
+                                            </>
+                                        )}
+                                        {aiResult.skills.suggestedSkillsList && (
+                                            <p><strong>Suggested List:</strong> {aiResult.skills.suggestedSkillsList}</p>
+                                        )}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                        {/* --- END: Corrected Rendering Logic --- */}
+
+                        {/* Message if no results yet */}
+                        {!aiResult && !aiLoading && (
+                             <div className={styles.centeredMessage}>Paste a job description and click "Personalize Resume".</div>
+                        )}
+                    </div>
+                </div>
+            );
         }
-        return null;
-    }
+
+        return null; // Should not happen in normal flow
+    };
+    // *** END UPDATED renderAiPanel Function ***
 
     const renderPreviewPanel = () => (
-        <div className={styles.previewPanel}><div className={styles.previewHeader}><h3>Live Preview</h3><button onClick={() => updatePreview(resume)} disabled={previewLoading} className={styles.updatePreviewButton}><FiRefreshCw className={previewLoading ? styles.spinning : ''} /><span>Refresh</span></button></div><div className={styles.pdfViewer}>{error && <div className={styles.centeredMessage}>{error}</div>}{!error && pdfUrl && <iframe src={pdfUrl} title="Resume Preview" className={styles.pdfPreview} />}{!error && !pdfUrl && <div className={styles.centeredMessage}>{previewLoading ? 'Generating...' : 'No Preview Available'}</div>}</div></div>
+        <div className={styles.previewPanel}><div className={styles.previewHeader}><h3>Live Preview</h3><button onClick={updatePreview} disabled={previewLoading} className={styles.updatePreviewButton}><FiRefreshCw className={previewLoading ? styles.spinning : ''} /><span>Refresh</span></button></div><div className={styles.pdfViewer}>{error && <div className={styles.centeredMessage}>{error}</div>}{!error && pdfUrl && <iframe src={pdfUrl} title="Resume Preview" className={styles.pdfPreview} />}{!error && !pdfUrl && <div className={styles.centeredMessage}>{previewLoading ? 'Generating...' : 'No Preview Available'}</div>}</div></div>
     );
 
     if (loading || !resume) return <div className={styles.centeredMessage}>Loading Editor...</div>;
